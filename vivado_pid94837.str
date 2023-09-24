@@ -1,0 +1,208 @@
+/*
+
+Xilinx Vivado v2021.2 (64-bit) [Major: 2021, Minor: 2]
+SW Build: 3367213 on Tue Oct 19 02:47:39 MDT 2021
+IP Build: 3369179 on Thu Oct 21 08:25:16 MDT 2021
+
+Process ID (PID): 94837
+License: Customer
+Mode: GUI Mode
+
+Current time: 	Sun Sep 24 16:47:29 WEST 2023
+Time zone: 	Western European Standard Time (Europe/Lisbon)
+
+OS: Ubuntu
+OS Version: 5.15.0-84-generic
+OS Architecture: amd64
+Available processors (cores): 4
+
+Display: 0
+Screen size: 2560x1440
+Screen resolution (DPI): 125
+Available screens: 1
+Default font: family=Dialog,name=Dialog,style=plain,size=21
+Scale size: 37
+
+Java version: 	11.0.11 64-bit
+Java home: 	/tools/Xilinx/Vivado/2021.2/tps/lnx64/jre11.0.11_9
+Java executable: 	/tools/Xilinx/Vivado/2021.2/tps/lnx64/jre11.0.11_9/bin/java
+Java arguments: 	[-Dsun.java2d.pmoffscreen=false, -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2, -Dsun.java2d.xrender=false, -Djdk.gtk.version=2, -Dsun.java2d.uiScale.enabled=false, -Xverify:none, -Dswing.aatext=true, -XX:-UsePerfData, -Djdk.map.althashing.threshold=512, -XX:StringTableSize=4072, --add-opens=java.base/java.nio=ALL-UNNAMED, --add-opens=java.desktop/sun.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-opens=java.desktop/com.sun.awt=ALL-UNNAMED, --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED, -XX:NewSize=60m, -XX:MaxNewSize=60m, -Xms256m, -Xmx3072m, -Xss5m, -Xrs]
+Java initial memory (-Xms): 	256 MB
+Java maximum memory (-Xmx):	 3 GB
+
+
+User name: 	luiscarlos
+User home directory: /home/luiscarlos
+User working directory: /home/luiscarlos/Desktop/ultra/super_secure_tiles
+User country: 	US
+User language: 	en
+User locale: 	en_US
+
+RDI_BASEROOT: /tools/Xilinx/Vivado
+HDI_APPROOT: /tools/Xilinx/Vivado/2021.2
+RDI_DATADIR: /tools/Xilinx/Vivado/2021.2/data
+RDI_BINDIR: /tools/Xilinx/Vivado/2021.2/bin
+
+Vivado preferences file: /home/luiscarlos/.Xilinx/Vivado/2021.2/vivado.xml
+Vivado preferences directory: /home/luiscarlos/.Xilinx/Vivado/2021.2/
+Vivado layouts directory: /home/luiscarlos/.Xilinx/Vivado/2021.2/data/layouts
+PlanAhead jar file: 	/tools/Xilinx/Vivado/2021.2/lib/classes/planAhead.jar
+Vivado log file: 	/home/luiscarlos/Desktop/ultra/super_secure_tiles/vivado.log
+Vivado journal file: 	/home/luiscarlos/Desktop/ultra/super_secure_tiles/vivado.jou
+Engine tmp dir: 	./.Xil/Vivado-94837-luiscarlos-HP-EliteBook-Folio-1040-G3
+
+Xilinx Environment Variables
+----------------------------
+XILINX: /tools/Xilinx/Vivado/2021.2/ids_lite/ISE
+XILINX_DSP: /tools/Xilinx/Vivado/2021.2/ids_lite/ISE
+XILINX_HLS: /tools/Xilinx/Vitis_HLS/2021.2
+XILINX_PLANAHEAD: /tools/Xilinx/Vivado/2021.2
+XILINX_SDK: /tools/Xilinx/Vitis/2021.2
+XILINX_VITIS: /tools/Xilinx/Vitis/2021.2
+XILINX_VIVADO: /tools/Xilinx/Vivado/2021.2
+XILINX_VIVADO_HLS: /tools/Xilinx/Vivado/2021.2
+
+
+GUI allocated memory:	317 MB
+GUI max memory:		3,072 MB
+Engine allocated memory: 2,042 MB
+
+Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
+
+*/
+
+// TclEventType: START_GUI
+// WARNING: HEventQueue.dispatchEvent() is taking  1299 ms.
+// Tcl Message: Sourcing tcl script '/home/luiscarlos/.Xilinx/Vivado/Vivado_init.tcl' 
+// Tcl Message: start_gui 
+// HMemoryUtils.trashcanNow. Engine heap size: 1,984 MB. GUI used memory: 67 MB. Current time: 9/24/23, 4:47:31 PM WEST
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  1001 ms.
+selectButton(PAResourceEtoH.GettingStartedView_OPEN_PROJECT, "Open Project"); // y
+// Run Command: PAResourceCommand.PACommandNames_OPEN_PROJECT
+setFileChooser("/home/luiscarlos/Desktop/ultra/super_secure_tiles/vivado_project/super_secure_tiles.xpr");
+// [GUI Memory]: 128 MB (+131519kb) [00:01:26]
+// [Engine Memory]: 1,991 MB (+1935841kb) [00:01:26]
+// Opening Vivado Project: /home/luiscarlos/Desktop/ultra/super_secure_tiles/vivado_project/super_secure_tiles.xpr. Version: Vivado v2021.2 
+// TclEventType: DEBUG_PROBE_SET_CHANGE
+// TclEventType: FLOW_ADDED
+// TclEventType: MSGMGR_MOVEMSG
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: FILE_SET_NEW
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_CURRENT
+// TclEventType: PR_PARTITION_RM_NEW
+// TclEventType: PROJECT_DASHBOARD_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// HMemoryUtils.trashcanNow. Engine heap size: 1,997 MB. GUI used memory: 66 MB. Current time: 9/24/23, 4:48:36 PM WEST
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: PROJECT_NEW
+// Tcl Message: open_project /home/luiscarlos/Desktop/ultra/super_secure_tiles/vivado_project/super_secure_tiles.xpr 
+// Tcl Message: Scanning sources... Finished scanning sources 
+// Tcl Message: INFO: [IP_Flow 19-234] Refreshing IP repositories INFO: [IP_Flow 19-1704] No user IP repositories specified INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/tools/Xilinx/Vivado/2021.2/data/ip'. 
+// TclEventType: PROJECT_NEW
+// [Engine Memory]: 2,202 MB (+117078kb) [00:01:46]
+// [GUI Memory]: 138 MB (+3575kb) [00:01:50]
+// WARNING: HEventQueue.dispatchEvent() is taking  17144 ms.
+// HMemoryUtils.trashcanNow. Engine heap size: 2,226 MB. GUI used memory: 92 MB. Current time: 9/24/23, 4:49:00 PM WEST
+// WARNING: HEventQueue.dispatchEvent() is taking  3318 ms.
+// WARNING: HEventQueue.dispatchEvent() is taking  2317 ms.
+// Tcl Message: open_project: Time (s): cpu = 00:00:48 ; elapsed = 00:00:26 . Memory (MB): peak = 8010.812 ; gain = 211.398 ; free physical = 8165 ; free virtual = 22164 
+// Project name: super_secure_tiles; location: /home/luiscarlos/Desktop/ultra/super_secure_tiles/vivado_project; part: xczu3eg-sbva484-1-i
+// Elapsed time: 35 seconds
+dismissDialog("Open Project"); // bA
+// TclEventType: FILE_SET_CHANGE
+// WARNING: HTimer (FileMgr Design Graph Update Timer) is taking 413ms to process. Increasing delay to 3000 ms.
+// TclEventType: FILE_SET_CHANGE
+// WARNING: HSwingWorker (Refresh Filesets Swing Worker) is taking 2246 ms. Increasing delay to 6738 ms.
+// [Engine Memory]: 2,327 MB (+15774kb) [00:02:04]
+// [GUI Memory]: 149 MB (+4424kb) [00:02:05]
+// HMemoryUtils.trashcanNow. Engine heap size: 2,328 MB. GUI used memory: 96 MB. Current time: 9/24/23, 4:49:16 PM WEST
+// Tcl Message: update_compile_order -fileset sources_1 
+// PAPropertyPanels.initPanels (aes.v) elapsed time: 0.3s
+// Elapsed time: 277 seconds
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, aes (aes.v)]", 2, true); // D - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, aes (aes.v), recv_fifo : synchronous_fifo (fifo_buff.v)]", 4, false, false, false, false, false, true); // D - Double Click
+// HMemoryUtils.trashcanNow. Engine heap size: 2,333 MB. GUI used memory: 98 MB. Current time: 9/24/23, 4:54:16 PM WEST
+// HMemoryUtils.trashcanNow. Engine heap size: 2,334 MB. GUI used memory: 98 MB. Current time: 9/24/23, 4:54:46 PM WEST
+// Elapsed time: 76 seconds
+selectButton(RDIResource.ProgressDialog_CANCEL, "Cancel"); // a
+dismissDialog("Opening Editor"); // bA
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Implementation, Run Implementation]", 18, false); // n
+// Run Command: PAResourceCommand.PACommandNames_RUN_IMPLEMENTATION
+dismissDialog("Synthesis is Out-of-date"); // A
+// [GUI Memory]: 158 MB (+2148kb) [00:08:01]
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Synthesis, Open Synthesized Design]", 16, true); // n - Node
+// Run Command: PAResourceCommand.PACommandNames_GOTO_NETLIST_DESIGN
+selectButton(PAResourceQtoS.StaleRunDialog_OPEN_DESIGN, "Open Design"); // a
+dismissDialog("Synthesis is Out-of-date"); // cg
+// Tcl Message: open_run synth_1 -name synth_1 -pr_config [current_pr_configuration] 
+// HMemoryUtils.trashcanNow. Engine heap size: 2,335 MB. GUI used memory: 99 MB. Current time: 9/24/23, 4:55:42 PM WEST
+// HMemoryUtils.trashcanNow. Engine heap size: 2,336 MB. GUI used memory: 119 MB. Current time: 9/24/23, 4:56:12 PM WEST
+// HMemoryUtils.trashcanNow. Engine heap size: 2,336 MB. GUI used memory: 100 MB. Current time: 9/24/23, 4:56:42 PM WEST

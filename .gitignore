@@ -1,0 +1,10 @@
+vivado_project/*
+./*.str
+./*.jou
+./*.log
+./*.debug
+.Xil/*
+vivado_*
+vivado.jou
+vivado.log
+hs_err*
