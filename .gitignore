@@ -8,3 +8,4 @@ vivado_*
 vivado.jou
 vivado.log
 hs_err*
+vitis_project/*
