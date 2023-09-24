@@ -29,6 +29,7 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/src/design/icap_inst.v"]"\
  "[file normalize "$origin_dir/src/design/width_conv.v"]"\
  "[file normalize "$origin_dir/src/constraints/IO_constraints.xdc"]"\
+ "[file normalize "$origin_dir/src/constraints/pblock_constraints.xdc"]"\
   ]
   foreach ifile $files {
     if { ![file isfile $ifile] } {
@@ -182,6 +183,14 @@ set obj [get_filesets constrs_1]
 set file "[file normalize "$origin_dir/src/constraints/IO_constraints.xdc"]"
 set file_added [add_files -norecurse -fileset $obj [list $file]]
 set file "$origin_dir/src/constraints/IO_constraints.xdc"
+set file [file normalize $file]
+set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
+set_property -name "file_type" -value "XDC" -objects $file_obj
+
+# Add/Import constrs file and set constrs file properties
+set file "[file normalize "$origin_dir/src/constraints/pblock_constraints.xdc"]"
+set file_added [add_files -norecurse -fileset $obj [list $file]]
+set file "$origin_dir/src/constraints/pblock_constraints.xdc"
 set file [file normalize $file]
 set file_obj [get_files -of_objects [get_filesets constrs_1] [list "*$file"]]
 set_property -name "file_type" -value "XDC" -objects $file_obj
@@ -712,8 +721,8 @@ proc cr_bd_design_1 { parentCell } {
   set bCheckIPs 1
   if { $bCheckIPs == 1 } {
      set list_check_ips "\ 
-  xilinx.com:ip:axi_uartlite:2.0\
   xilinx.com:ip:dfx_controller:1.0\
+  xilinx.com:ip:dfx_decoupler:1.0\
   xilinx.com:ip:iomodule:3.1\
   xilinx.com:ip:mdm:3.2\
   xilinx.com:ip:microblaze:11.0\
@@ -943,10 +952,11 @@ proc create_hier_cell_microblaze_0_local_memory { parentCell nameHier } {
 
 
   # Create interface ports
-  set uart_rtl [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 uart_rtl ]
+  set uart_rtl_0 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 uart_rtl_0 ]
 
 
   # Create ports
+  set GPO1_0 [ create_bd_port -dir O -from 0 -to 0 GPO1_0 ]
 
   # Create instance: AXI_width_conv_0, and set properties
   set block_name AXI_width_conv
@@ -1033,14 +1043,8 @@ proc create_hier_cell_microblaze_0_local_memory { parentCell nameHier } {
   # Create instance: axi_interconnect_2, and set properties
   set axi_interconnect_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_2 ]
   set_property -dict [ list \
-   CONFIG.NUM_MI {3} \
+   CONFIG.NUM_MI {2} \
  ] $axi_interconnect_2
-
-  # Create instance: axi_uartlite_0, and set properties
-  set axi_uartlite_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 axi_uartlite_0 ]
-  set_property -dict [ list \
-   CONFIG.C_BAUDRATE {115200} \
- ] $axi_uartlite_0
 
   # Create instance: dfx_controller_0, and set properties
   set dfx_controller_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:dfx_controller:1.0 dfx_controller_0 ]
@@ -1052,26 +1056,210 @@ proc create_hier_cell_microblaze_0_local_memory { parentCell nameHier } {
      CP_FIFO_TYPE {lutram}\
      CDC_STAGES {6}\
      VS {RP_1 {ID 0 NAME RP_1 RM {RP_1 {ID 0 NAME RP_1 BS {0 {ID 0 ADDR 0 SIZE 0 CLEAR\
-0}} RESET_REQUIRED low}} POR_RM RP_1 HAS_POR_RM 1} RP_2 {ID 1 NAME RP_2 RM\
-{RP_2 {ID 0 NAME RP_2 BS {0 {ID 0 ADDR 0 SIZE 0 CLEAR 0}} RESET_REQUIRED\
-low}} HAS_POR_RM 1 POR_RM RP_2} RP_3 {ID 2 NAME RP_3 RM {RP_3 {ID 0 NAME RP_3\
-BS {0 {ID 0 ADDR 0 SIZE 0 CLEAR 0}} RESET_REQUIRED low}} HAS_POR_RM 1 POR_RM\
-RP_3}}\
+0}} RESET_REQUIRED low RESET_DURATION 128}} POR_RM RP_1 HAS_POR_RM 1} RP_2\
+{ID 1 NAME RP_2 RM {RP_2 {ID 0 NAME RP_2 BS {0 {ID 0 ADDR 0 SIZE 0 CLEAR 0}}\
+RESET_REQUIRED low RESET_DURATION 128}} HAS_POR_RM 1 POR_RM RP_2} RP_3 {ID 2\
+NAME RP_3 RM {RP_3 {ID 0 NAME RP_3 BS {0 {ID 0 ADDR 0 SIZE 0 CLEAR 0}}\
+RESET_REQUIRED low RESET_DURATION 128}} HAS_POR_RM 1 POR_RM RP_3}}\
      CP_FAMILY {ultrascale_plus}\
      DIRTY {0}\
    } \
-   CONFIG.GUI_RM_NEW_NAME {RP_2} \
+   CONFIG.GUI_RM_NEW_NAME {RP_1} \
+   CONFIG.GUI_RM_RESET_DURATION {128} \
    CONFIG.GUI_RM_RESET_REQUIRED {low} \
    CONFIG.GUI_SELECT_RM {0} \
    CONFIG.GUI_SELECT_TRIGGER_0 {0} \
    CONFIG.GUI_SELECT_TRIGGER_1 {0} \
    CONFIG.GUI_SELECT_TRIGGER_2 {0} \
    CONFIG.GUI_SELECT_TRIGGER_3 {0} \
-   CONFIG.GUI_SELECT_VS {1} \
+   CONFIG.GUI_SELECT_VS {0} \
    CONFIG.GUI_VS_HAS_POR_RM {true} \
-   CONFIG.GUI_VS_NEW_NAME {RP_2} \
+   CONFIG.GUI_VS_NEW_NAME {RP_1} \
    CONFIG.GUI_VS_POR_RM {0} \
  ] $dfx_controller_0
+
+  # Create instance: dfx_decoupler_0, and set properties
+  set dfx_decoupler_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:dfx_decoupler:1.0 dfx_decoupler_0 ]
+  set_property -dict [ list \
+   CONFIG.ALL_PARAMS {\
+     INTF {intf_0 {ID 0 VLNV xilinx.com:interface:aximm_rtl:1.0 MODE slave PROTOCOL\
+axi4lite SIGNALS {ARVALID {PRESENT 1 WIDTH 1} ARREADY {PRESENT 1 WIDTH 1}\
+AWVALID {PRESENT 1 WIDTH 1} AWREADY {PRESENT 1 WIDTH 1} BVALID {PRESENT 1\
+WIDTH 1} BREADY {PRESENT 1 WIDTH 1} RVALID {PRESENT 1 WIDTH 1} RREADY\
+{PRESENT 1 WIDTH 1} WVALID {PRESENT 1 WIDTH 1} WREADY {PRESENT 1 WIDTH 1}\
+AWADDR {PRESENT 1 WIDTH 40} AWLEN {PRESENT 0 WIDTH 8} AWSIZE {PRESENT 0\
+WIDTH 3} AWBURST {PRESENT 0 WIDTH 2} AWLOCK {PRESENT 0 WIDTH 1} AWCACHE\
+{PRESENT 0 WIDTH 4} AWPROT {PRESENT 1 WIDTH 3} WDATA {PRESENT 1 WIDTH 32}\
+WSTRB {PRESENT 1 WIDTH 4} WLAST {PRESENT 0 WIDTH 1} BRESP {PRESENT 1 WIDTH\
+2} ARADDR {PRESENT 1 WIDTH 40} ARLEN {PRESENT 0 WIDTH 8} ARSIZE {PRESENT 0\
+WIDTH 3} ARBURST {PRESENT 0 WIDTH 2} ARLOCK {PRESENT 0 WIDTH 1} ARCACHE\
+{PRESENT 0 WIDTH 4} ARPROT {PRESENT 1 WIDTH 3} RDATA {PRESENT 1 WIDTH 32}\
+RRESP {PRESENT 1 WIDTH 2} RLAST {PRESENT 0 WIDTH 1} AWID {PRESENT 0 WIDTH\
+0} AWREGION {PRESENT 1 WIDTH 4} AWQOS {PRESENT 1 WIDTH 4} AWUSER {PRESENT 0\
+WIDTH 0} WID {PRESENT 0 WIDTH 0} WUSER {PRESENT 0 WIDTH 0} BID {PRESENT 0\
+WIDTH 0} BUSER {PRESENT 0 WIDTH 0} ARID {PRESENT 0 WIDTH 0} ARREGION\
+{PRESENT 1 WIDTH 4} ARQOS {PRESENT 1 WIDTH 4} ARUSER {PRESENT 0 WIDTH 0}\
+RID {PRESENT 0 WIDTH 0} RUSER {PRESENT 0 WIDTH 0}}}}\
+     IPI_PROP_COUNT {0}\
+   } \
+   CONFIG.GUI_INTERFACE_NAME {intf_0} \
+   CONFIG.GUI_INTERFACE_PROTOCOL {axi4lite} \
+   CONFIG.GUI_SELECT_INTERFACE {0} \
+   CONFIG.GUI_SELECT_MODE {slave} \
+   CONFIG.GUI_SELECT_VLNV {xilinx.com:interface:aximm_rtl:1.0} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_0 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_1 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_2 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_3 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_4 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_5 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_6 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_7 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_8 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_9 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_0 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_1 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_2 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_3 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_4 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_5 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_6 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_7 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_8 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_9 {true} \
+   CONFIG.GUI_SIGNAL_SELECT_0 {ARVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_1 {ARREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_2 {AWVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_3 {AWREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_4 {BVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_5 {BREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_6 {RVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_7 {RREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_8 {WVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_9 {WREADY} \
+ ] $dfx_decoupler_0
+
+  # Create instance: dfx_decoupler_1, and set properties
+  set dfx_decoupler_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:dfx_decoupler:1.0 dfx_decoupler_1 ]
+  set_property -dict [ list \
+   CONFIG.ALL_PARAMS {\
+     INTF {intf_0 {ID 0 VLNV xilinx.com:interface:aximm_rtl:1.0 MODE slave PROTOCOL\
+axi4lite SIGNALS {ARVALID {PRESENT 1 WIDTH 1} ARREADY {PRESENT 1 WIDTH 1}\
+AWVALID {PRESENT 1 WIDTH 1} AWREADY {PRESENT 1 WIDTH 1} BVALID {PRESENT 1\
+WIDTH 1} BREADY {PRESENT 1 WIDTH 1} RVALID {PRESENT 1 WIDTH 1} RREADY\
+{PRESENT 1 WIDTH 1} WVALID {PRESENT 1 WIDTH 1} WREADY {PRESENT 1 WIDTH 1}\
+AWADDR {PRESENT 1 WIDTH 40} AWLEN {PRESENT 0 WIDTH 8} AWSIZE {PRESENT 0\
+WIDTH 3} AWBURST {PRESENT 0 WIDTH 2} AWLOCK {PRESENT 0 WIDTH 1} AWCACHE\
+{PRESENT 0 WIDTH 4} AWPROT {PRESENT 1 WIDTH 3} WDATA {PRESENT 1 WIDTH 32}\
+WSTRB {PRESENT 1 WIDTH 4} WLAST {PRESENT 0 WIDTH 1} BRESP {PRESENT 1 WIDTH\
+2} ARADDR {PRESENT 1 WIDTH 40} ARLEN {PRESENT 0 WIDTH 8} ARSIZE {PRESENT 0\
+WIDTH 3} ARBURST {PRESENT 0 WIDTH 2} ARLOCK {PRESENT 0 WIDTH 1} ARCACHE\
+{PRESENT 0 WIDTH 4} ARPROT {PRESENT 1 WIDTH 3} RDATA {PRESENT 1 WIDTH 32}\
+RRESP {PRESENT 1 WIDTH 2} RLAST {PRESENT 0 WIDTH 1} AWID {PRESENT 0 WIDTH\
+0} AWREGION {PRESENT 1 WIDTH 4} AWQOS {PRESENT 1 WIDTH 4} AWUSER {PRESENT 0\
+WIDTH 0} WID {PRESENT 0 WIDTH 0} WUSER {PRESENT 0 WIDTH 0} BID {PRESENT 0\
+WIDTH 0} BUSER {PRESENT 0 WIDTH 0} ARID {PRESENT 0 WIDTH 0} ARREGION\
+{PRESENT 1 WIDTH 4} ARQOS {PRESENT 1 WIDTH 4} ARUSER {PRESENT 0 WIDTH 0}\
+RID {PRESENT 0 WIDTH 0} RUSER {PRESENT 0 WIDTH 0}}}}\
+     IPI_PROP_COUNT {0}\
+   } \
+   CONFIG.GUI_INTERFACE_NAME {intf_0} \
+   CONFIG.GUI_INTERFACE_PROTOCOL {axi4lite} \
+   CONFIG.GUI_SELECT_INTERFACE {0} \
+   CONFIG.GUI_SELECT_MODE {slave} \
+   CONFIG.GUI_SELECT_VLNV {xilinx.com:interface:aximm_rtl:1.0} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_0 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_1 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_2 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_3 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_4 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_5 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_6 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_7 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_8 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_9 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_0 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_1 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_2 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_3 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_4 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_5 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_6 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_7 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_8 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_9 {true} \
+   CONFIG.GUI_SIGNAL_SELECT_0 {ARVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_1 {ARREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_2 {AWVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_3 {AWREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_4 {BVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_5 {BREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_6 {RVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_7 {RREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_8 {WVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_9 {WREADY} \
+ ] $dfx_decoupler_1
+
+  # Create instance: dfx_decoupler_2, and set properties
+  set dfx_decoupler_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:dfx_decoupler:1.0 dfx_decoupler_2 ]
+  set_property -dict [ list \
+   CONFIG.ALL_PARAMS {\
+     INTF {intf_0 {ID 0 VLNV xilinx.com:interface:aximm_rtl:1.0 PROTOCOL axi4lite\
+SIGNALS {ARVALID {PRESENT 1 WIDTH 1} ARREADY {PRESENT 1 WIDTH 1} AWVALID\
+{PRESENT 1 WIDTH 1} AWREADY {PRESENT 1 WIDTH 1} BVALID {PRESENT 1 WIDTH 1}\
+BREADY {PRESENT 1 WIDTH 1} RVALID {PRESENT 1 WIDTH 1} RREADY {PRESENT 1\
+WIDTH 1} WVALID {PRESENT 1 WIDTH 1} WREADY {PRESENT 1 WIDTH 1} AWADDR\
+{PRESENT 1 WIDTH 40} AWLEN {PRESENT 0 WIDTH 8} AWSIZE {PRESENT 0 WIDTH 3}\
+AWBURST {PRESENT 0 WIDTH 2} AWLOCK {PRESENT 0 WIDTH 1} AWCACHE {PRESENT 0\
+WIDTH 4} AWPROT {PRESENT 1 WIDTH 3} WDATA {PRESENT 1 WIDTH 32} WSTRB\
+{PRESENT 1 WIDTH 4} WLAST {PRESENT 0 WIDTH 1} BRESP {PRESENT 1 WIDTH 2}\
+ARADDR {PRESENT 1 WIDTH 40} ARLEN {PRESENT 0 WIDTH 8} ARSIZE {PRESENT 0\
+WIDTH 3} ARBURST {PRESENT 0 WIDTH 2} ARLOCK {PRESENT 0 WIDTH 1} ARCACHE\
+{PRESENT 0 WIDTH 4} ARPROT {PRESENT 1 WIDTH 3} RDATA {PRESENT 1 WIDTH 32}\
+RRESP {PRESENT 1 WIDTH 2} RLAST {PRESENT 0 WIDTH 1} AWID {PRESENT 0 WIDTH\
+0} AWREGION {PRESENT 1 WIDTH 4} AWQOS {PRESENT 1 WIDTH 4} AWUSER {PRESENT 0\
+WIDTH 0} WID {PRESENT 0 WIDTH 0} WUSER {PRESENT 0 WIDTH 0} BID {PRESENT 0\
+WIDTH 0} BUSER {PRESENT 0 WIDTH 0} ARID {PRESENT 0 WIDTH 0} ARREGION\
+{PRESENT 1 WIDTH 4} ARQOS {PRESENT 1 WIDTH 4} ARUSER {PRESENT 0 WIDTH 0}\
+RID {PRESENT 0 WIDTH 0} RUSER {PRESENT 0 WIDTH 0}} MODE slave}}\
+     IPI_PROP_COUNT {0}\
+   } \
+   CONFIG.GUI_INTERFACE_NAME {intf_0} \
+   CONFIG.GUI_INTERFACE_PROTOCOL {axi4lite} \
+   CONFIG.GUI_SELECT_INTERFACE {0} \
+   CONFIG.GUI_SELECT_MODE {slave} \
+   CONFIG.GUI_SELECT_VLNV {xilinx.com:interface:aximm_rtl:1.0} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_0 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_1 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_2 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_3 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_4 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_5 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_6 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_7 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_8 {true} \
+   CONFIG.GUI_SIGNAL_DECOUPLED_9 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_0 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_1 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_2 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_3 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_4 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_5 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_6 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_7 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_8 {true} \
+   CONFIG.GUI_SIGNAL_PRESENT_9 {true} \
+   CONFIG.GUI_SIGNAL_SELECT_0 {ARVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_1 {ARREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_2 {AWVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_3 {AWREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_4 {BVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_5 {BREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_6 {RVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_7 {RREADY} \
+   CONFIG.GUI_SIGNAL_SELECT_8 {WVALID} \
+   CONFIG.GUI_SIGNAL_SELECT_9 {WREADY} \
+ ] $dfx_decoupler_2
 
   # Create instance: icap_inst_0, and set properties
   set block_name icap_inst
@@ -1088,7 +1276,12 @@ RP_3}}\
   set iomodule_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:iomodule:3.1 iomodule_0 ]
   set_property -dict [ list \
    CONFIG.C_GPO1_SIZE {1} \
+   CONFIG.C_GPO2_SIZE {1} \
+   CONFIG.C_UART_BAUDRATE {115200} \
    CONFIG.C_USE_GPO1 {1} \
+   CONFIG.C_USE_GPO2 {1} \
+   CONFIG.C_USE_UART_RX {1} \
+   CONFIG.C_USE_UART_TX {1} \
  ] $iomodule_0
 
   # Create instance: mdm_1, and set properties
@@ -1867,36 +2060,45 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   # Create interface connections
   connect_bd_intf_net -intf_net S00_AXI_1 [get_bd_intf_pins axi_interconnect_0/S00_AXI] [get_bd_intf_pins dfx_controller_0/M_AXI_MEM]
   connect_bd_intf_net -intf_net S00_AXI_2 [get_bd_intf_pins aes_0/m00_axi] [get_bd_intf_pins axi_interconnect_1/S00_AXI]
+  connect_bd_intf_net -intf_net S_AXI_1 [get_bd_intf_pins RP_2/S_AXI] [get_bd_intf_pins dfx_decoupler_1/rp_intf_0]
+  connect_bd_intf_net -intf_net S_AXI_2 [get_bd_intf_pins RP_3/S_AXI] [get_bd_intf_pins dfx_decoupler_2/rp_intf_0]
   connect_bd_intf_net -intf_net axi_interconnect_0_M00_AXI [get_bd_intf_pins aes_0/s00_axi] [get_bd_intf_pins axi_interconnect_0/M00_AXI]
   connect_bd_intf_net -intf_net axi_interconnect_1_M00_AXI [get_bd_intf_pins axi_interconnect_1/M00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/S_AXI_HPC0_FPD]
   connect_bd_intf_net -intf_net axi_interconnect_2_M00_AXI [get_bd_intf_pins axi_interconnect_2/M00_AXI] [get_bd_intf_pins dfx_controller_0/s_axi_reg]
   connect_bd_intf_net -intf_net axi_interconnect_2_M01_AXI [get_bd_intf_pins axi_interconnect_1/S01_AXI] [get_bd_intf_pins axi_interconnect_2/M01_AXI]
-  connect_bd_intf_net -intf_net axi_interconnect_2_M02_AXI [get_bd_intf_pins axi_interconnect_2/M02_AXI] [get_bd_intf_pins axi_uartlite_0/S_AXI]
-  connect_bd_intf_net -intf_net axi_uartlite_0_UART [get_bd_intf_ports uart_rtl] [get_bd_intf_pins axi_uartlite_0/UART]
   connect_bd_intf_net -intf_net dfx_controller_0_ICAP [get_bd_intf_pins dfx_controller_0/ICAP] [get_bd_intf_pins icap_inst_0/ICAP]
+  connect_bd_intf_net -intf_net dfx_decoupler_0_rp_intf_0 [get_bd_intf_pins RP_1/S_AXI] [get_bd_intf_pins dfx_decoupler_0/rp_intf_0]
   connect_bd_intf_net -intf_net dlmb_v10_iomodule_0 [get_bd_intf_pins iomodule_0/SLMB] [get_bd_intf_pins microblaze_0_local_memory/LMB_Sl_1]
+  connect_bd_intf_net -intf_net iomodule_0_UART [get_bd_intf_ports uart_rtl_0] [get_bd_intf_pins iomodule_0/UART]
   connect_bd_intf_net -intf_net microblaze_0_M0_AXIS [get_bd_intf_pins AXI_width_conv_key_0/s00_axis] [get_bd_intf_pins microblaze_0/M0_AXIS]
   connect_bd_intf_net -intf_net microblaze_0_M1_AXIS [get_bd_intf_pins AXI_width_conv_0/s00_axis] [get_bd_intf_pins microblaze_0/M1_AXIS]
   connect_bd_intf_net -intf_net microblaze_0_M_AXI_DP [get_bd_intf_pins axi_interconnect_2/S00_AXI] [get_bd_intf_pins microblaze_0/M_AXI_DP]
   connect_bd_intf_net -intf_net microblaze_0_debug [get_bd_intf_pins mdm_1/MBDEBUG_0] [get_bd_intf_pins microblaze_0/DEBUG]
   connect_bd_intf_net -intf_net microblaze_0_dlmb_1 [get_bd_intf_pins microblaze_0/DLMB] [get_bd_intf_pins microblaze_0_local_memory/DLMB]
   connect_bd_intf_net -intf_net microblaze_0_ilmb_1 [get_bd_intf_pins microblaze_0/ILMB] [get_bd_intf_pins microblaze_0_local_memory/ILMB]
-  connect_bd_intf_net -intf_net ps8_0_axi_periph_M00_AXI [get_bd_intf_pins RP_1/S_AXI] [get_bd_intf_pins ps8_0_axi_periph/M00_AXI]
-  connect_bd_intf_net -intf_net ps8_0_axi_periph_M01_AXI [get_bd_intf_pins RP_2/S_AXI] [get_bd_intf_pins ps8_0_axi_periph/M01_AXI]
-  connect_bd_intf_net -intf_net ps8_0_axi_periph_M02_AXI [get_bd_intf_pins RP_3/S_AXI] [get_bd_intf_pins ps8_0_axi_periph/M02_AXI]
+  connect_bd_intf_net -intf_net ps8_0_axi_periph_M00_AXI [get_bd_intf_pins dfx_decoupler_0/s_intf_0] [get_bd_intf_pins ps8_0_axi_periph/M00_AXI]
+  connect_bd_intf_net -intf_net ps8_0_axi_periph_M01_AXI [get_bd_intf_pins dfx_decoupler_1/s_intf_0] [get_bd_intf_pins ps8_0_axi_periph/M01_AXI]
+  connect_bd_intf_net -intf_net ps8_0_axi_periph_M02_AXI [get_bd_intf_pins dfx_decoupler_2/s_intf_0] [get_bd_intf_pins ps8_0_axi_periph/M02_AXI]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_FPD [get_bd_intf_pins ps8_0_axi_periph/S00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_FPD]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM1_FPD [get_bd_intf_pins ps8_0_axi_periph/S01_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM1_FPD]
 
   # Create port connections
   connect_bd_net -net AXI_width_conv_0_output_data [get_bd_pins AXI_width_conv_0/output_data] [get_bd_pins aes_0/in_IV]
   connect_bd_net -net AXI_width_conv_key_0_output_data [get_bd_pins AXI_width_conv_key_0/output_data] [get_bd_pins aes_0/dbg_key]
-  connect_bd_net -net iomodule_0_GPO1 [get_bd_pins aes_0/new_bit] [get_bd_pins iomodule_0/GPO1]
+  connect_bd_net -net dfx_controller_0_vsm_RP_1_rm_decouple [get_bd_pins dfx_controller_0/vsm_RP_1_rm_decouple] [get_bd_pins dfx_decoupler_0/decouple]
+  connect_bd_net -net dfx_controller_0_vsm_RP_2_rm_decouple [get_bd_pins dfx_controller_0/vsm_RP_2_rm_decouple] [get_bd_pins dfx_decoupler_1/decouple]
+  connect_bd_net -net dfx_controller_0_vsm_RP_3_rm_decouple [get_bd_pins dfx_controller_0/vsm_RP_3_rm_decouple] [get_bd_pins dfx_decoupler_2/decouple]
+  connect_bd_net -net iomodule_0_GPO1 [get_bd_ports GPO1_0] [get_bd_pins iomodule_0/GPO1]
+  connect_bd_net -net iomodule_0_GPO2 [get_bd_pins aes_0/new_bit] [get_bd_pins iomodule_0/GPO2]
   connect_bd_net -net mdm_1_debug_sys_rst [get_bd_pins mdm_1/Debug_SYS_Rst] [get_bd_pins rst_ps8_0_100M/mb_debug_sys_rst]
-  connect_bd_net -net microblaze_0_Clk [get_bd_pins AXI_width_conv_0/s00_axis_aclk] [get_bd_pins AXI_width_conv_key_0/s00_axis_aclk] [get_bd_pins RP_1/s_axi_aclk] [get_bd_pins RP_2/s_axi_aclk] [get_bd_pins RP_3/s_axi_aclk] [get_bd_pins aes_0/clk] [get_bd_pins aes_0/m00_axi_aclk] [get_bd_pins aes_0/s00_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_1/ACLK] [get_bd_pins axi_interconnect_1/M00_ACLK] [get_bd_pins axi_interconnect_1/S00_ACLK] [get_bd_pins axi_interconnect_1/S01_ACLK] [get_bd_pins axi_interconnect_2/ACLK] [get_bd_pins axi_interconnect_2/M00_ACLK] [get_bd_pins axi_interconnect_2/M01_ACLK] [get_bd_pins axi_interconnect_2/M02_ACLK] [get_bd_pins axi_interconnect_2/S00_ACLK] [get_bd_pins axi_uartlite_0/s_axi_aclk] [get_bd_pins dfx_controller_0/clk] [get_bd_pins dfx_controller_0/icap_clk] [get_bd_pins icap_inst_0/CLK] [get_bd_pins iomodule_0/Clk] [get_bd_pins microblaze_0/Clk] [get_bd_pins microblaze_0_local_memory/LMB_Clk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/M01_ACLK] [get_bd_pins ps8_0_axi_periph/M02_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins ps8_0_axi_periph/S01_ACLK] [get_bd_pins rst_ps8_0_100M/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm1_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/saxihpc0_fpd_aclk]
+  connect_bd_net -net microblaze_0_Clk [get_bd_pins AXI_width_conv_0/s00_axis_aclk] [get_bd_pins AXI_width_conv_key_0/s00_axis_aclk] [get_bd_pins RP_1/s_axi_aclk] [get_bd_pins RP_2/s_axi_aclk] [get_bd_pins RP_3/s_axi_aclk] [get_bd_pins aes_0/clk] [get_bd_pins aes_0/m00_axi_aclk] [get_bd_pins aes_0/s00_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_1/ACLK] [get_bd_pins axi_interconnect_1/M00_ACLK] [get_bd_pins axi_interconnect_1/S00_ACLK] [get_bd_pins axi_interconnect_1/S01_ACLK] [get_bd_pins axi_interconnect_2/ACLK] [get_bd_pins axi_interconnect_2/M00_ACLK] [get_bd_pins axi_interconnect_2/M01_ACLK] [get_bd_pins axi_interconnect_2/S00_ACLK] [get_bd_pins dfx_controller_0/clk] [get_bd_pins dfx_controller_0/icap_clk] [get_bd_pins icap_inst_0/CLK] [get_bd_pins iomodule_0/Clk] [get_bd_pins microblaze_0/Clk] [get_bd_pins microblaze_0_local_memory/LMB_Clk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/M01_ACLK] [get_bd_pins ps8_0_axi_periph/M02_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins ps8_0_axi_periph/S01_ACLK] [get_bd_pins rst_ps8_0_100M/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm1_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/saxihpc0_fpd_aclk]
   connect_bd_net -net rst_ps8_0_100M_bus_struct_reset [get_bd_pins microblaze_0_local_memory/SYS_Rst] [get_bd_pins rst_ps8_0_100M/bus_struct_reset]
   connect_bd_net -net rst_ps8_0_100M_mb_reset [get_bd_pins microblaze_0/Reset] [get_bd_pins rst_ps8_0_100M/mb_reset]
-  connect_bd_net -net rst_ps8_0_100M_peripheral_aresetn [get_bd_pins AXI_width_conv_0/s00_axis_aresetn] [get_bd_pins AXI_width_conv_key_0/s00_axis_aresetn] [get_bd_pins RP_1/s_axi_aresetn] [get_bd_pins RP_2/s_axi_aresetn] [get_bd_pins RP_3/s_axi_aresetn] [get_bd_pins aes_0/m00_axi_aresetn] [get_bd_pins aes_0/reset_n] [get_bd_pins aes_0/s00_axi_aresetn] [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins axi_interconnect_1/ARESETN] [get_bd_pins axi_interconnect_1/M00_ARESETN] [get_bd_pins axi_interconnect_1/S00_ARESETN] [get_bd_pins axi_interconnect_1/S01_ARESETN] [get_bd_pins axi_interconnect_2/ARESETN] [get_bd_pins axi_interconnect_2/M00_ARESETN] [get_bd_pins axi_interconnect_2/M01_ARESETN] [get_bd_pins axi_interconnect_2/M02_ARESETN] [get_bd_pins axi_interconnect_2/S00_ARESETN] [get_bd_pins axi_uartlite_0/s_axi_aresetn] [get_bd_pins dfx_controller_0/icap_reset] [get_bd_pins dfx_controller_0/reset] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/M01_ARESETN] [get_bd_pins ps8_0_axi_periph/M02_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins ps8_0_axi_periph/S01_ARESETN] [get_bd_pins rst_ps8_0_100M/peripheral_aresetn]
+  connect_bd_net -net rst_ps8_0_100M_peripheral_aresetn [get_bd_pins AXI_width_conv_0/s00_axis_aresetn] [get_bd_pins AXI_width_conv_key_0/s00_axis_aresetn] [get_bd_pins aes_0/m00_axi_aresetn] [get_bd_pins aes_0/reset_n] [get_bd_pins aes_0/s00_axi_aresetn] [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins axi_interconnect_1/ARESETN] [get_bd_pins axi_interconnect_1/M00_ARESETN] [get_bd_pins axi_interconnect_1/S00_ARESETN] [get_bd_pins axi_interconnect_1/S01_ARESETN] [get_bd_pins axi_interconnect_2/ARESETN] [get_bd_pins axi_interconnect_2/M00_ARESETN] [get_bd_pins axi_interconnect_2/M01_ARESETN] [get_bd_pins axi_interconnect_2/S00_ARESETN] [get_bd_pins dfx_controller_0/icap_reset] [get_bd_pins dfx_controller_0/reset] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/M01_ARESETN] [get_bd_pins ps8_0_axi_periph/M02_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins ps8_0_axi_periph/S01_ARESETN] [get_bd_pins rst_ps8_0_100M/peripheral_aresetn]
   connect_bd_net -net rst_ps8_0_100M_peripheral_reset [get_bd_pins iomodule_0/Rst] [get_bd_pins rst_ps8_0_100M/peripheral_reset]
+  connect_bd_net -net s_axi_aresetn_1 [get_bd_pins RP_1/s_axi_aresetn] [get_bd_pins dfx_controller_0/vsm_RP_1_rm_reset]
+  connect_bd_net -net s_axi_aresetn_2 [get_bd_pins RP_2/s_axi_aresetn] [get_bd_pins dfx_controller_0/vsm_RP_2_rm_reset]
+  connect_bd_net -net s_axi_aresetn_3 [get_bd_pins RP_3/s_axi_aresetn] [get_bd_pins dfx_controller_0/vsm_RP_3_rm_reset]
   connect_bd_net -net xlconstant_0_dout [get_bd_pins aes_0/dbg_ENCLEN] [get_bd_pins xlconstant_0/dout]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins rst_ps8_0_100M/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
 
@@ -1904,7 +2106,6 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces aes_0/m00_axi] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP0/HPC0_DDR_LOW] -force
   assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces aes_0/m00_axi] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP0/HPC0_LPS_OCM] -force
   assign_bd_address -offset 0x00000000 -range 0x000100000000 -target_address_space [get_bd_addr_spaces dfx_controller_0/Data] [get_bd_addr_segs aes_0/s00_axi/reg0] -force
-  assign_bd_address -offset 0x80020000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs axi_uartlite_0/S_AXI/Reg] -force
   assign_bd_address -offset 0x80010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs dfx_controller_0/s_axi_reg/Reg] -force
   assign_bd_address -offset 0x80000000 -range 0x00008000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs microblaze_0_local_memory/dlmb_bram_if_cntlr/SLMB/Mem] -force
   assign_bd_address -offset 0x80000000 -range 0x00008000 -target_address_space [get_bd_addr_spaces microblaze_0/Instruction] [get_bd_addr_segs microblaze_0_local_memory/ilmb_bram_if_cntlr/SLMB/Mem] -force
