@@ -18,15 +18,16 @@
 proc checkRequiredFiles { origin_dir} {
   set status true
   set files [list \
- "[file normalize "$origin_dir/src/design/aes_sbox.v"]"\
- "[file normalize "$origin_dir/src/design/aes.v"]"\
+ "[file normalize "$origin_dir/src/design/aes_core.v"]"\
+ "[file normalize "$origin_dir/src/design/aes_decipher_block.v"]"\
  "[file normalize "$origin_dir/src/design/aes_encipher_block.v"]"\
  "[file normalize "$origin_dir/src/design/aes_inv_sbox.v"]"\
  "[file normalize "$origin_dir/src/design/aes_key_mem.v"]"\
+ "[file normalize "$origin_dir/src/design/aes_sbox.v"]"\
  "[file normalize "$origin_dir/src/design/fifo_buff.v"]"\
+ "[file normalize "$origin_dir/src/design/aes.v"]"\
  "[file normalize "$origin_dir/src/design/icap_inst.v"]"\
- "[file normalize "$origin_dir/src/design/aes_decipher_block.v"]"\
- "[file normalize "$origin_dir/src/design/aes_core.v"]"\
+ "[file normalize "$origin_dir/src/design/width_conv.v"]"\
  "[file normalize "$origin_dir/src/constraints/IO_constraints.xdc"]"\
   ]
   foreach ifile $files {
@@ -136,7 +137,7 @@ set_property -name "revised_directory_structure" -value "1" -objects $obj
 set_property -name "sim.central_dir" -value "$proj_dir/${_xil_proj_name_}.ip_user_files" -objects $obj
 set_property -name "sim.ip.auto_export_scripts" -value "1" -objects $obj
 set_property -name "simulator_language" -value "Mixed" -objects $obj
-set_property -name "xpm_libraries" -value "XPM_CDC XPM_MEMORY" -objects $obj
+set_property -name "xpm_libraries" -value "XPM_CDC XPM_FIFO XPM_MEMORY" -objects $obj
 
 # Create 'sources_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sources_1] ""]} {
@@ -146,15 +147,16 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
 # Set 'sources_1' fileset object
 set obj [get_filesets sources_1]
 set files [list \
- [file normalize "${origin_dir}/src/design/aes_sbox.v"] \
- [file normalize "${origin_dir}/src/design/aes.v"] \
+ [file normalize "${origin_dir}/src/design/aes_core.v"] \
+ [file normalize "${origin_dir}/src/design/aes_decipher_block.v"] \
  [file normalize "${origin_dir}/src/design/aes_encipher_block.v"] \
  [file normalize "${origin_dir}/src/design/aes_inv_sbox.v"] \
  [file normalize "${origin_dir}/src/design/aes_key_mem.v"] \
+ [file normalize "${origin_dir}/src/design/aes_sbox.v"] \
  [file normalize "${origin_dir}/src/design/fifo_buff.v"] \
+ [file normalize "${origin_dir}/src/design/aes.v"] \
  [file normalize "${origin_dir}/src/design/icap_inst.v"] \
- [file normalize "${origin_dir}/src/design/aes_decipher_block.v"] \
- [file normalize "${origin_dir}/src/design/aes_core.v"] \
+ [file normalize "${origin_dir}/src/design/width_conv.v"] \
 ]
 add_files -norecurse -fileset $obj $files
 
@@ -648,10 +650,48 @@ cr_bd_my_axi_const33 ""
 set_property REGISTERED_WITH_MANAGER "1" [get_files my_axi_const33.bd ] 
 set_property SYNTH_CHECKPOINT_MODE "Hierarchical" [get_files my_axi_const33.bd ] 
 
+if { [get_files aes_core.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes_core.v"
+}
+if { [get_files aes_decipher_block.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes_decipher_block.v"
+}
+if { [get_files aes_encipher_block.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes_encipher_block.v"
+}
+if { [get_files aes_inv_sbox.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes_inv_sbox.v"
+}
+if { [get_files aes_key_mem.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes_key_mem.v"
+}
+if { [get_files aes_sbox.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes_sbox.v"
+}
+if { [get_files fifo_buff.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/fifo_buff.v"
+}
+if { [get_files aes.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes.v"
+}
+if { [get_files icap_inst.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/icap_inst.v"
+}
+if { [get_files width_conv.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/width_conv.v"
+}
+if { [get_files width_conv.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/width_conv.v"
+}
 
 
 # Proc to create BD design_1
 proc cr_bd_design_1 { parentCell } {
+# The design that will be created by this Tcl proc contains the following 
+# module references:
+# AXI_width_conv, AXI_width_conv, aes, icap_inst
+
+
 # The design that will be created by this Tcl proc contains the following 
 # block design container source references:
 # my_axi_const33, my_axi_const44, my_axi_const55
@@ -672,8 +712,17 @@ proc cr_bd_design_1 { parentCell } {
   set bCheckIPs 1
   if { $bCheckIPs == 1 } {
      set list_check_ips "\ 
+  xilinx.com:ip:axi_uartlite:2.0\
+  xilinx.com:ip:dfx_controller:1.0\
+  xilinx.com:ip:iomodule:3.1\
+  xilinx.com:ip:mdm:3.2\
+  xilinx.com:ip:microblaze:11.0\
   xilinx.com:ip:proc_sys_reset:5.0\
+  xilinx.com:ip:xlconstant:1.1\
   xilinx.com:ip:zynq_ultra_ps_e:3.3\
+  xilinx.com:ip:lmb_bram_if_cntlr:4.0\
+  xilinx.com:ip:lmb_v10:3.0\
+  xilinx.com:ip:blk_mem_gen:8.4\
   "
 
    set list_ips_missing ""
@@ -692,6 +741,34 @@ proc cr_bd_design_1 { parentCell } {
    }
 
   }
+
+  ##################################################################
+  # CHECK Modules
+  ##################################################################
+  set bCheckModules 1
+  if { $bCheckModules == 1 } {
+     set list_check_mods "\ 
+  AXI_width_conv\
+  AXI_width_conv\
+  aes\
+  icap_inst\
+  "
+
+   set list_mods_missing ""
+   common::send_gid_msg -ssname BD::TCL -id 2020 -severity "INFO" "Checking if the following modules exist in the project's sources: $list_check_mods ."
+
+   foreach mod_vlnv $list_check_mods {
+      if { [can_resolve_reference $mod_vlnv] == 0 } {
+         lappend list_mods_missing $mod_vlnv
+      }
+   }
+
+   if { $list_mods_missing ne "" } {
+      catch {common::send_gid_msg -ssname BD::TCL -id 2021 -severity "ERROR" "The following module(s) are not found in the project: $list_mods_missing" }
+      common::send_gid_msg -ssname BD::TCL -id 2022 -severity "INFO" "Please add source files for the missing module(s) above."
+      set bCheckIPsPassed 0
+   }
+}
 
   ##################################################################
   # CHECK Block Design Container Sources
@@ -747,6 +824,97 @@ proc cr_bd_design_1 { parentCell } {
     return 3
   }
 
+  
+# Hierarchical cell: microblaze_0_local_memory
+proc create_hier_cell_microblaze_0_local_memory { parentCell nameHier } {
+
+  variable script_folder
+
+  if { $parentCell eq "" || $nameHier eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2092 -severity "ERROR" "create_hier_cell_microblaze_0_local_memory() - Empty argument(s)!"}
+     return
+  }
+
+  # Get object for parentCell
+  set parentObj [get_bd_cells $parentCell]
+  if { $parentObj == "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
+     return
+  }
+
+  # Make sure parentObj is hier blk
+  set parentType [get_property TYPE $parentObj]
+  if { $parentType ne "hier" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
+     return
+  }
+
+  # Save current instance; Restore later
+  set oldCurInst [current_bd_instance .]
+
+  # Set parent object as current
+  current_bd_instance $parentObj
+
+  # Create cell and set as current instance
+  set hier_obj [create_bd_cell -type hier $nameHier]
+  current_bd_instance $hier_obj
+
+  # Create interface pins
+  create_bd_intf_pin -mode MirroredMaster -vlnv xilinx.com:interface:lmb_rtl:1.0 DLMB
+
+  create_bd_intf_pin -mode MirroredMaster -vlnv xilinx.com:interface:lmb_rtl:1.0 ILMB
+
+  create_bd_intf_pin -mode MirroredSlave -vlnv xilinx.com:interface:lmb_rtl:1.0 LMB_Sl_1
+
+
+  # Create pins
+  create_bd_pin -dir I -type clk LMB_Clk
+  create_bd_pin -dir I -type rst SYS_Rst
+
+  # Create instance: dlmb_bram_if_cntlr, and set properties
+  set dlmb_bram_if_cntlr [ create_bd_cell -type ip -vlnv xilinx.com:ip:lmb_bram_if_cntlr:4.0 dlmb_bram_if_cntlr ]
+  set_property -dict [ list \
+   CONFIG.C_ECC {0} \
+ ] $dlmb_bram_if_cntlr
+
+  # Create instance: dlmb_v10, and set properties
+  set dlmb_v10 [ create_bd_cell -type ip -vlnv xilinx.com:ip:lmb_v10:3.0 dlmb_v10 ]
+  set_property -dict [ list \
+   CONFIG.C_LMB_NUM_SLAVES {2} \
+ ] $dlmb_v10
+
+  # Create instance: ilmb_bram_if_cntlr, and set properties
+  set ilmb_bram_if_cntlr [ create_bd_cell -type ip -vlnv xilinx.com:ip:lmb_bram_if_cntlr:4.0 ilmb_bram_if_cntlr ]
+  set_property -dict [ list \
+   CONFIG.C_ECC {0} \
+ ] $ilmb_bram_if_cntlr
+
+  # Create instance: ilmb_v10, and set properties
+  set ilmb_v10 [ create_bd_cell -type ip -vlnv xilinx.com:ip:lmb_v10:3.0 ilmb_v10 ]
+
+  # Create instance: lmb_bram, and set properties
+  set lmb_bram [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 lmb_bram ]
+  set_property -dict [ list \
+   CONFIG.Memory_Type {True_Dual_Port_RAM} \
+   CONFIG.use_bram_block {BRAM_Controller} \
+ ] $lmb_bram
+
+  # Create interface connections
+  connect_bd_intf_net -intf_net dlmb_v10_iomodule_0 [get_bd_intf_pins LMB_Sl_1] [get_bd_intf_pins dlmb_v10/LMB_Sl_1]
+  connect_bd_intf_net -intf_net microblaze_0_dlmb [get_bd_intf_pins DLMB] [get_bd_intf_pins dlmb_v10/LMB_M]
+  connect_bd_intf_net -intf_net microblaze_0_dlmb_bus [get_bd_intf_pins dlmb_bram_if_cntlr/SLMB] [get_bd_intf_pins dlmb_v10/LMB_Sl_0]
+  connect_bd_intf_net -intf_net microblaze_0_dlmb_cntlr [get_bd_intf_pins dlmb_bram_if_cntlr/BRAM_PORT] [get_bd_intf_pins lmb_bram/BRAM_PORTA]
+  connect_bd_intf_net -intf_net microblaze_0_ilmb [get_bd_intf_pins ILMB] [get_bd_intf_pins ilmb_v10/LMB_M]
+  connect_bd_intf_net -intf_net microblaze_0_ilmb_bus [get_bd_intf_pins ilmb_bram_if_cntlr/SLMB] [get_bd_intf_pins ilmb_v10/LMB_Sl_0]
+  connect_bd_intf_net -intf_net microblaze_0_ilmb_cntlr [get_bd_intf_pins ilmb_bram_if_cntlr/BRAM_PORT] [get_bd_intf_pins lmb_bram/BRAM_PORTB]
+
+  # Create port connections
+  connect_bd_net -net SYS_Rst_1 [get_bd_pins SYS_Rst] [get_bd_pins dlmb_bram_if_cntlr/LMB_Rst] [get_bd_pins dlmb_v10/SYS_Rst] [get_bd_pins ilmb_bram_if_cntlr/LMB_Rst] [get_bd_pins ilmb_v10/SYS_Rst]
+  connect_bd_net -net microblaze_0_Clk [get_bd_pins LMB_Clk] [get_bd_pins dlmb_bram_if_cntlr/LMB_Clk] [get_bd_pins dlmb_v10/LMB_Clk] [get_bd_pins ilmb_bram_if_cntlr/LMB_Clk] [get_bd_pins ilmb_v10/LMB_Clk]
+
+  # Restore current instance
+  current_bd_instance $oldCurInst
+}
   variable script_folder
 
   if { $parentCell eq "" } {
@@ -775,9 +943,36 @@ proc cr_bd_design_1 { parentCell } {
 
 
   # Create interface ports
+  set uart_rtl [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 uart_rtl ]
+
 
   # Create ports
 
+  # Create instance: AXI_width_conv_0, and set properties
+  set block_name AXI_width_conv
+  set block_cell_name AXI_width_conv_0
+  if { [catch {set AXI_width_conv_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $AXI_width_conv_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+    set_property -dict [ list \
+   CONFIG.OUT_WIDTH {128} \
+ ] $AXI_width_conv_0
+
+  # Create instance: AXI_width_conv_key_0, and set properties
+  set block_name AXI_width_conv
+  set block_cell_name AXI_width_conv_key_0
+  if { [catch {set AXI_width_conv_key_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $AXI_width_conv_key_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
   # Create instance: RP_1, and set properties
   set RP_1 [ create_bd_cell -type container -reference my_axi_const33 RP_1 ]
   set_property -dict [ list \
@@ -811,6 +1006,119 @@ proc cr_bd_design_1 { parentCell } {
    CONFIG.LOCK_PROPAGATE {true} \
  ] $RP_3
 
+  # Create instance: aes_0, and set properties
+  set block_name aes
+  set block_cell_name aes_0
+  if { [catch {set aes_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $aes_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
+  # Create instance: axi_interconnect_0, and set properties
+  set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
+  set_property -dict [ list \
+   CONFIG.NUM_MI {1} \
+ ] $axi_interconnect_0
+
+  # Create instance: axi_interconnect_1, and set properties
+  set axi_interconnect_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_1 ]
+  set_property -dict [ list \
+   CONFIG.NUM_MI {1} \
+   CONFIG.NUM_SI {2} \
+ ] $axi_interconnect_1
+
+  # Create instance: axi_interconnect_2, and set properties
+  set axi_interconnect_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_2 ]
+  set_property -dict [ list \
+   CONFIG.NUM_MI {3} \
+ ] $axi_interconnect_2
+
+  # Create instance: axi_uartlite_0, and set properties
+  set axi_uartlite_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 axi_uartlite_0 ]
+  set_property -dict [ list \
+   CONFIG.C_BAUDRATE {115200} \
+ ] $axi_uartlite_0
+
+  # Create instance: dfx_controller_0, and set properties
+  set dfx_controller_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:dfx_controller:1.0 dfx_controller_0 ]
+  set_property -dict [ list \
+   CONFIG.ALL_PARAMS {\
+     HAS_AXI_LITE_IF {1}\
+     RESET_ACTIVE_LEVEL {0}\
+     CP_FIFO_DEPTH {32}\
+     CP_FIFO_TYPE {lutram}\
+     CDC_STAGES {6}\
+     VS {RP_1 {ID 0 NAME RP_1 RM {RP_1 {ID 0 NAME RP_1 BS {0 {ID 0 ADDR 0 SIZE 0 CLEAR\
+0}} RESET_REQUIRED low}} POR_RM RP_1 HAS_POR_RM 1} RP_2 {ID 1 NAME RP_2 RM\
+{RP_2 {ID 0 NAME RP_2 BS {0 {ID 0 ADDR 0 SIZE 0 CLEAR 0}} RESET_REQUIRED\
+low}} HAS_POR_RM 1 POR_RM RP_2} RP_3 {ID 2 NAME RP_3 RM {RP_3 {ID 0 NAME RP_3\
+BS {0 {ID 0 ADDR 0 SIZE 0 CLEAR 0}} RESET_REQUIRED low}} HAS_POR_RM 1 POR_RM\
+RP_3}}\
+     CP_FAMILY {ultrascale_plus}\
+     DIRTY {0}\
+   } \
+   CONFIG.GUI_RM_NEW_NAME {RP_2} \
+   CONFIG.GUI_RM_RESET_REQUIRED {low} \
+   CONFIG.GUI_SELECT_RM {0} \
+   CONFIG.GUI_SELECT_TRIGGER_0 {0} \
+   CONFIG.GUI_SELECT_TRIGGER_1 {0} \
+   CONFIG.GUI_SELECT_TRIGGER_2 {0} \
+   CONFIG.GUI_SELECT_TRIGGER_3 {0} \
+   CONFIG.GUI_SELECT_VS {1} \
+   CONFIG.GUI_VS_HAS_POR_RM {true} \
+   CONFIG.GUI_VS_NEW_NAME {RP_2} \
+   CONFIG.GUI_VS_POR_RM {0} \
+ ] $dfx_controller_0
+
+  # Create instance: icap_inst_0, and set properties
+  set block_name icap_inst
+  set block_cell_name icap_inst_0
+  if { [catch {set icap_inst_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2095 -severity "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   } elseif { $icap_inst_0 eq "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2096 -severity "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
+     return 1
+   }
+  
+  # Create instance: iomodule_0, and set properties
+  set iomodule_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:iomodule:3.1 iomodule_0 ]
+  set_property -dict [ list \
+   CONFIG.C_GPO1_SIZE {1} \
+   CONFIG.C_USE_GPO1 {1} \
+ ] $iomodule_0
+
+  # Create instance: mdm_1, and set properties
+  set mdm_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:mdm:3.2 mdm_1 ]
+
+  # Create instance: microblaze_0, and set properties
+  set microblaze_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:microblaze:11.0 microblaze_0 ]
+  set_property -dict [ list \
+   CONFIG.C_ADDR_TAG_BITS {0} \
+   CONFIG.C_AREA_OPTIMIZED {1} \
+   CONFIG.C_BASE_VECTORS {0x0000000080000000} \
+   CONFIG.C_CACHE_BYTE_SIZE {4096} \
+   CONFIG.C_DCACHE_ADDR_TAG {0} \
+   CONFIG.C_DCACHE_BYTE_SIZE {4096} \
+   CONFIG.C_DEBUG_ENABLED {1} \
+   CONFIG.C_D_AXI {1} \
+   CONFIG.C_D_LMB {1} \
+   CONFIG.C_FSL_LINKS {2} \
+   CONFIG.C_I_LMB {1} \
+   CONFIG.C_MMU_DTLB_SIZE {2} \
+   CONFIG.C_MMU_ITLB_SIZE {1} \
+   CONFIG.C_MMU_ZONES {2} \
+   CONFIG.C_NUMBER_OF_PC_BRK {0} \
+   CONFIG.C_USE_REORDER_INSTR {0} \
+   CONFIG.G_TEMPLATE_LIST {1} \
+ ] $microblaze_0
+
+  # Create instance: microblaze_0_local_memory
+  create_hier_cell_microblaze_0_local_memory [current_bd_instance .] microblaze_0_local_memory
+
   # Create instance: ps8_0_axi_periph, and set properties
   set ps8_0_axi_periph [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 ps8_0_axi_periph ]
   set_property -dict [ list \
@@ -820,6 +1128,13 @@ proc cr_bd_design_1 { parentCell } {
 
   # Create instance: rst_ps8_0_100M, and set properties
   set rst_ps8_0_100M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ps8_0_100M ]
+
+  # Create instance: xlconstant_0, and set properties
+  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
+  set_property -dict [ list \
+   CONFIG.CONST_VAL {2} \
+   CONFIG.CONST_WIDTH {2} \
+ ] $xlconstant_0
 
   # Create instance: zynq_ultra_ps_e_0, and set properties
   set zynq_ultra_ps_e_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.3 zynq_ultra_ps_e_0 ]
@@ -1046,6 +1361,7 @@ txd#rxd#rxd#txd#scl_out#sda_out#sclk_out#gpio0[7]#gpio0[8]#n_ss_out[0]#miso#mosi
    CONFIG.PSU_SD1_INTERNAL_BUS_WIDTH {4} \
    CONFIG.PSU_USB3__DUAL_CLOCK_ENABLE {1} \
    CONFIG.PSU__ACT_DDR_FREQ_MHZ {533.333313} \
+   CONFIG.PSU__AFI0_COHERENCY {0} \
    CONFIG.PSU__CAN1__GRP_CLK__ENABLE {0} \
    CONFIG.PSU__CAN1__PERIPHERAL__ENABLE {0} \
    CONFIG.PSU__CRF_APB__ACPU_CTRL__ACT_FREQMHZ {1200.000000} \
@@ -1446,7 +1762,7 @@ txd#rxd#rxd#txd#scl_out#sda_out#sclk_out#gpio0[7]#gpio0[8]#n_ss_out[0]#miso#mosi
    CONFIG.PSU__PMU__PLERROR__ENABLE {0} \
    CONFIG.PSU__PRESET_APPLIED {1} \
    CONFIG.PSU__PROTECTION__MASTERS {\
-USB1:NonSecure;1|USB0:NonSecure;1|S_AXI_LPD:NA;0|S_AXI_HPC1_FPD:NA;0|S_AXI_HPC0_FPD:NA;0|S_AXI_HP3_FPD:NA;0|S_AXI_HP2_FPD:NA;0|S_AXI_HP1_FPD:NA;0|S_AXI_HP0_FPD:NA;0|S_AXI_ACP:NA;0|S_AXI_ACE:NA;0|SD1:NonSecure;1|SD0:NonSecure;1|SATA1:NonSecure;0|SATA0:NonSecure;0|RPU1:Secure;1|RPU0:Secure;1|QSPI:NonSecure;0|PMU:NA;1|PCIe:NonSecure;0|NAND:NonSecure;0|LDMA:NonSecure;1|GPU:NonSecure;1|GEM3:NonSecure;0|GEM2:NonSecure;0|GEM1:NonSecure;0|GEM0:NonSecure;0|FDMA:NonSecure;1|DP:NonSecure;1|DAP:NA;1|Coresight:NA;1|CSU:NA;1|APU:NA;1} \
+USB1:NonSecure;1|USB0:NonSecure;1|S_AXI_LPD:NA;0|S_AXI_HPC1_FPD:NA;0|S_AXI_HPC0_FPD:NA;1|S_AXI_HP3_FPD:NA;0|S_AXI_HP2_FPD:NA;0|S_AXI_HP1_FPD:NA;0|S_AXI_HP0_FPD:NA;0|S_AXI_ACP:NA;0|S_AXI_ACE:NA;0|SD1:NonSecure;1|SD0:NonSecure;1|SATA1:NonSecure;0|SATA0:NonSecure;0|RPU1:Secure;1|RPU0:Secure;1|QSPI:NonSecure;0|PMU:NA;1|PCIe:NonSecure;0|NAND:NonSecure;0|LDMA:NonSecure;1|GPU:NonSecure;1|GEM3:NonSecure;0|GEM2:NonSecure;0|GEM1:NonSecure;0|GEM0:NonSecure;0|FDMA:NonSecure;1|DP:NonSecure;1|DAP:NA;1|Coresight:NA;1|CSU:NA;1|APU:NA;1} \
    CONFIG.PSU__PROTECTION__SLAVES {\
 LPD;USB3_1_XHCI;FE300000;FE3FFFFF;1|LPD;USB3_1;FF9E0000;FF9EFFFF;1|LPD;USB3_0_XHCI;FE200000;FE2FFFFF;1|LPD;USB3_0;FF9D0000;FF9DFFFF;1|LPD;UART1;FF010000;FF01FFFF;1|LPD;UART0;FF000000;FF00FFFF;1|LPD;TTC3;FF140000;FF14FFFF;1|LPD;TTC2;FF130000;FF13FFFF;1|LPD;TTC1;FF120000;FF12FFFF;1|LPD;TTC0;FF110000;FF11FFFF;1|FPD;SWDT1;FD4D0000;FD4DFFFF;1|LPD;SWDT0;FF150000;FF15FFFF;1|LPD;SPI1;FF050000;FF05FFFF;1|LPD;SPI0;FF040000;FF04FFFF;1|FPD;SMMU_REG;FD5F0000;FD5FFFFF;1|FPD;SMMU;FD800000;FDFFFFFF;1|FPD;SIOU;FD3D0000;FD3DFFFF;1|FPD;SERDES;FD400000;FD47FFFF;1|LPD;SD1;FF170000;FF17FFFF;1|LPD;SD0;FF160000;FF16FFFF;1|FPD;SATA;FD0C0000;FD0CFFFF;0|LPD;RTC;FFA60000;FFA6FFFF;1|LPD;RSA_CORE;FFCE0000;FFCEFFFF;1|LPD;RPU;FF9A0000;FF9AFFFF;1|LPD;R5_TCM_RAM_GLOBAL;FFE00000;FFE3FFFF;1|LPD;R5_1_Instruction_Cache;FFEC0000;FFECFFFF;1|LPD;R5_1_Data_Cache;FFED0000;FFEDFFFF;1|LPD;R5_1_BTCM_GLOBAL;FFEB0000;FFEBFFFF;1|LPD;R5_1_ATCM_GLOBAL;FFE90000;FFE9FFFF;1|LPD;R5_0_Instruction_Cache;FFE40000;FFE4FFFF;1|LPD;R5_0_Data_Cache;FFE50000;FFE5FFFF;1|LPD;R5_0_BTCM_GLOBAL;FFE20000;FFE2FFFF;1|LPD;R5_0_ATCM_GLOBAL;FFE00000;FFE0FFFF;1|LPD;QSPI_Linear_Address;C0000000;DFFFFFFF;1|LPD;QSPI;FF0F0000;FF0FFFFF;0|LPD;PMU_RAM;FFDC0000;FFDDFFFF;1|LPD;PMU_GLOBAL;FFD80000;FFDBFFFF;1|FPD;PCIE_MAIN;FD0E0000;FD0EFFFF;0|FPD;PCIE_LOW;E0000000;EFFFFFFF;0|FPD;PCIE_HIGH2;8000000000;BFFFFFFFFF;0|FPD;PCIE_HIGH1;600000000;7FFFFFFFF;0|FPD;PCIE_DMA;FD0F0000;FD0FFFFF;0|FPD;PCIE_ATTRIB;FD480000;FD48FFFF;0|LPD;OCM_XMPU_CFG;FFA70000;FFA7FFFF;1|LPD;OCM_SLCR;FF960000;FF96FFFF;1|OCM;OCM;FFFC0000;FFFFFFFF;1|LPD;NAND;FF100000;FF10FFFF;0|LPD;MBISTJTAG;FFCF0000;FFCFFFFF;1|LPD;LPD_XPPU_SINK;FF9C0000;FF9CFFFF;1|LPD;LPD_XPPU;FF980000;FF98FFFF;1|LPD;LPD_SLCR_SECURE;FF4B0000;FF4DFFFF;1|LPD;LPD_SLCR;FF410000;FF4AFFFF;1|LPD;LPD_GPV;FE100000;FE1FFFFF;1|LPD;LPD_DMA_7;FFAF0000;FFAFFFFF;1|LPD;LPD_DMA_6;FFAE0000;FFAEFFFF;1|LPD;LPD_DMA_5;FFAD0000;FFADFFFF;1|LPD;LPD_DMA_4;FFAC0000;FFACFFFF;1|LPD;LPD_DMA_3;FFAB0000;FFABFFFF;1|LPD;LPD_DMA_2;FFAA0000;FFAAFFFF;1|LPD;LPD_DMA_1;FFA90000;FFA9FFFF;1|LPD;LPD_DMA_0;FFA80000;FFA8FFFF;1|LPD;IPI_CTRL;FF380000;FF3FFFFF;1|LPD;IOU_SLCR;FF180000;FF23FFFF;1|LPD;IOU_SECURE_SLCR;FF240000;FF24FFFF;1|LPD;IOU_SCNTRS;FF260000;FF26FFFF;1|LPD;IOU_SCNTR;FF250000;FF25FFFF;1|LPD;IOU_GPV;FE000000;FE0FFFFF;1|LPD;I2C1;FF030000;FF03FFFF;1|LPD;I2C0;FF020000;FF02FFFF;0|FPD;GPU;FD4B0000;FD4BFFFF;1|LPD;GPIO;FF0A0000;FF0AFFFF;1|LPD;GEM3;FF0E0000;FF0EFFFF;0|LPD;GEM2;FF0D0000;FF0DFFFF;0|LPD;GEM1;FF0C0000;FF0CFFFF;0|LPD;GEM0;FF0B0000;FF0BFFFF;0|FPD;FPD_XMPU_SINK;FD4F0000;FD4FFFFF;1|FPD;FPD_XMPU_CFG;FD5D0000;FD5DFFFF;1|FPD;FPD_SLCR_SECURE;FD690000;FD6CFFFF;1|FPD;FPD_SLCR;FD610000;FD68FFFF;1|FPD;FPD_DMA_CH7;FD570000;FD57FFFF;1|FPD;FPD_DMA_CH6;FD560000;FD56FFFF;1|FPD;FPD_DMA_CH5;FD550000;FD55FFFF;1|FPD;FPD_DMA_CH4;FD540000;FD54FFFF;1|FPD;FPD_DMA_CH3;FD530000;FD53FFFF;1|FPD;FPD_DMA_CH2;FD520000;FD52FFFF;1|FPD;FPD_DMA_CH1;FD510000;FD51FFFF;1|FPD;FPD_DMA_CH0;FD500000;FD50FFFF;1|LPD;EFUSE;FFCC0000;FFCCFFFF;1|FPD;Display\
 Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD050000;FD05FFFF;1|FPD;DDR_XMPU4_CFG;FD040000;FD04FFFF;1|FPD;DDR_XMPU3_CFG;FD030000;FD03FFFF;1|FPD;DDR_XMPU2_CFG;FD020000;FD02FFFF;1|FPD;DDR_XMPU1_CFG;FD010000;FD01FFFF;1|FPD;DDR_XMPU0_CFG;FD000000;FD00FFFF;1|FPD;DDR_QOS_CTRL;FD090000;FD09FFFF;1|FPD;DDR_PHY;FD080000;FD08FFFF;1|DDR;DDR_LOW;0;7FFFFFFF;1|DDR;DDR_HIGH;800000000;800000000;0|FPD;DDDR_CTRL;FD070000;FD070FFF;1|LPD;Coresight;FE800000;FEFFFFFF;1|LPD;CSU_DMA;FFC80000;FFC9FFFF;1|LPD;CSU;FFCA0000;FFCAFFFF;1|LPD;CRL_APB;FF5E0000;FF85FFFF;1|FPD;CRF_APB;FD1A0000;FD2DFFFF;1|FPD;CCI_REG;FD5E0000;FD5EFFFF;1|LPD;CAN1;FF070000;FF07FFFF;0|LPD;CAN0;FF060000;FF06FFFF;0|FPD;APU;FD5C0000;FD5CFFFF;1|LPD;APM_INTC_IOU;FFA20000;FFA2FFFF;1|LPD;APM_FPD_LPD;FFA30000;FFA3FFFF;1|FPD;APM_5;FD490000;FD49FFFF;1|FPD;APM_0;FD0B0000;FD0BFFFF;1|LPD;APM2;FFA10000;FFA1FFFF;1|LPD;APM1;FFA00000;FFA0FFFF;1|LPD;AMS;FFA50000;FFA5FFFF;1|FPD;AFI_5;FD3B0000;FD3BFFFF;1|FPD;AFI_4;FD3A0000;FD3AFFFF;1|FPD;AFI_3;FD390000;FD39FFFF;1|FPD;AFI_2;FD380000;FD38FFFF;1|FPD;AFI_1;FD370000;FD37FFFF;1|FPD;AFI_0;FD360000;FD36FFFF;1|LPD;AFIFM6;FF9B0000;FF9BFFFF;1|FPD;ACPU_GIC;F9010000;F907FFFF;1} \
@@ -1458,6 +1774,7 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
    CONFIG.PSU__SATA__LANE0__ENABLE {0} \
    CONFIG.PSU__SATA__LANE1__ENABLE {0} \
    CONFIG.PSU__SATA__PERIPHERAL__ENABLE {0} \
+   CONFIG.PSU__SAXIGP0__DATA_WIDTH {128} \
    CONFIG.PSU__SD0_COHERENCY {0} \
    CONFIG.PSU__SD0_ROUTE_THROUGH_FPD {0} \
    CONFIG.PSU__SD0__DATA_TRANSFER_MODE {4Bit} \
@@ -1544,9 +1861,26 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
    CONFIG.PSU__USE__M_AXI_GP0 {1} \
    CONFIG.PSU__USE__M_AXI_GP1 {1} \
    CONFIG.PSU__USE__M_AXI_GP2 {0} \
+   CONFIG.PSU__USE__S_AXI_GP0 {1} \
  ] $zynq_ultra_ps_e_0
 
   # Create interface connections
+  connect_bd_intf_net -intf_net S00_AXI_1 [get_bd_intf_pins axi_interconnect_0/S00_AXI] [get_bd_intf_pins dfx_controller_0/M_AXI_MEM]
+  connect_bd_intf_net -intf_net S00_AXI_2 [get_bd_intf_pins aes_0/m00_axi] [get_bd_intf_pins axi_interconnect_1/S00_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M00_AXI [get_bd_intf_pins aes_0/s00_axi] [get_bd_intf_pins axi_interconnect_0/M00_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_1_M00_AXI [get_bd_intf_pins axi_interconnect_1/M00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/S_AXI_HPC0_FPD]
+  connect_bd_intf_net -intf_net axi_interconnect_2_M00_AXI [get_bd_intf_pins axi_interconnect_2/M00_AXI] [get_bd_intf_pins dfx_controller_0/s_axi_reg]
+  connect_bd_intf_net -intf_net axi_interconnect_2_M01_AXI [get_bd_intf_pins axi_interconnect_1/S01_AXI] [get_bd_intf_pins axi_interconnect_2/M01_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_2_M02_AXI [get_bd_intf_pins axi_interconnect_2/M02_AXI] [get_bd_intf_pins axi_uartlite_0/S_AXI]
+  connect_bd_intf_net -intf_net axi_uartlite_0_UART [get_bd_intf_ports uart_rtl] [get_bd_intf_pins axi_uartlite_0/UART]
+  connect_bd_intf_net -intf_net dfx_controller_0_ICAP [get_bd_intf_pins dfx_controller_0/ICAP] [get_bd_intf_pins icap_inst_0/ICAP]
+  connect_bd_intf_net -intf_net dlmb_v10_iomodule_0 [get_bd_intf_pins iomodule_0/SLMB] [get_bd_intf_pins microblaze_0_local_memory/LMB_Sl_1]
+  connect_bd_intf_net -intf_net microblaze_0_M0_AXIS [get_bd_intf_pins AXI_width_conv_key_0/s00_axis] [get_bd_intf_pins microblaze_0/M0_AXIS]
+  connect_bd_intf_net -intf_net microblaze_0_M1_AXIS [get_bd_intf_pins AXI_width_conv_0/s00_axis] [get_bd_intf_pins microblaze_0/M1_AXIS]
+  connect_bd_intf_net -intf_net microblaze_0_M_AXI_DP [get_bd_intf_pins axi_interconnect_2/S00_AXI] [get_bd_intf_pins microblaze_0/M_AXI_DP]
+  connect_bd_intf_net -intf_net microblaze_0_debug [get_bd_intf_pins mdm_1/MBDEBUG_0] [get_bd_intf_pins microblaze_0/DEBUG]
+  connect_bd_intf_net -intf_net microblaze_0_dlmb_1 [get_bd_intf_pins microblaze_0/DLMB] [get_bd_intf_pins microblaze_0_local_memory/DLMB]
+  connect_bd_intf_net -intf_net microblaze_0_ilmb_1 [get_bd_intf_pins microblaze_0/ILMB] [get_bd_intf_pins microblaze_0_local_memory/ILMB]
   connect_bd_intf_net -intf_net ps8_0_axi_periph_M00_AXI [get_bd_intf_pins RP_1/S_AXI] [get_bd_intf_pins ps8_0_axi_periph/M00_AXI]
   connect_bd_intf_net -intf_net ps8_0_axi_periph_M01_AXI [get_bd_intf_pins RP_2/S_AXI] [get_bd_intf_pins ps8_0_axi_periph/M01_AXI]
   connect_bd_intf_net -intf_net ps8_0_axi_periph_M02_AXI [get_bd_intf_pins RP_3/S_AXI] [get_bd_intf_pins ps8_0_axi_periph/M02_AXI]
@@ -1554,11 +1888,29 @@ Port;FD4A0000;FD4AFFFF;1|FPD;DPDMA;FD4C0000;FD4CFFFF;1|FPD;DDR_XMPU5_CFG;FD05000
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM1_FPD [get_bd_intf_pins ps8_0_axi_periph/S01_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM1_FPD]
 
   # Create port connections
-  connect_bd_net -net rst_ps8_0_100M_peripheral_aresetn [get_bd_pins RP_1/s_axi_aresetn] [get_bd_pins RP_2/s_axi_aresetn] [get_bd_pins RP_3/s_axi_aresetn] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/M01_ARESETN] [get_bd_pins ps8_0_axi_periph/M02_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins ps8_0_axi_periph/S01_ARESETN] [get_bd_pins rst_ps8_0_100M/peripheral_aresetn]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins RP_1/s_axi_aclk] [get_bd_pins RP_2/s_axi_aclk] [get_bd_pins RP_3/s_axi_aclk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/M01_ACLK] [get_bd_pins ps8_0_axi_periph/M02_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins ps8_0_axi_periph/S01_ACLK] [get_bd_pins rst_ps8_0_100M/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm1_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0]
+  connect_bd_net -net AXI_width_conv_0_output_data [get_bd_pins AXI_width_conv_0/output_data] [get_bd_pins aes_0/in_IV]
+  connect_bd_net -net AXI_width_conv_key_0_output_data [get_bd_pins AXI_width_conv_key_0/output_data] [get_bd_pins aes_0/dbg_key]
+  connect_bd_net -net iomodule_0_GPO1 [get_bd_pins aes_0/new_bit] [get_bd_pins iomodule_0/GPO1]
+  connect_bd_net -net mdm_1_debug_sys_rst [get_bd_pins mdm_1/Debug_SYS_Rst] [get_bd_pins rst_ps8_0_100M/mb_debug_sys_rst]
+  connect_bd_net -net microblaze_0_Clk [get_bd_pins AXI_width_conv_0/s00_axis_aclk] [get_bd_pins AXI_width_conv_key_0/s00_axis_aclk] [get_bd_pins RP_1/s_axi_aclk] [get_bd_pins RP_2/s_axi_aclk] [get_bd_pins RP_3/s_axi_aclk] [get_bd_pins aes_0/clk] [get_bd_pins aes_0/m00_axi_aclk] [get_bd_pins aes_0/s00_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_1/ACLK] [get_bd_pins axi_interconnect_1/M00_ACLK] [get_bd_pins axi_interconnect_1/S00_ACLK] [get_bd_pins axi_interconnect_1/S01_ACLK] [get_bd_pins axi_interconnect_2/ACLK] [get_bd_pins axi_interconnect_2/M00_ACLK] [get_bd_pins axi_interconnect_2/M01_ACLK] [get_bd_pins axi_interconnect_2/M02_ACLK] [get_bd_pins axi_interconnect_2/S00_ACLK] [get_bd_pins axi_uartlite_0/s_axi_aclk] [get_bd_pins dfx_controller_0/clk] [get_bd_pins dfx_controller_0/icap_clk] [get_bd_pins icap_inst_0/CLK] [get_bd_pins iomodule_0/Clk] [get_bd_pins microblaze_0/Clk] [get_bd_pins microblaze_0_local_memory/LMB_Clk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/M01_ACLK] [get_bd_pins ps8_0_axi_periph/M02_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins ps8_0_axi_periph/S01_ACLK] [get_bd_pins rst_ps8_0_100M/slowest_sync_clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm1_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/saxihpc0_fpd_aclk]
+  connect_bd_net -net rst_ps8_0_100M_bus_struct_reset [get_bd_pins microblaze_0_local_memory/SYS_Rst] [get_bd_pins rst_ps8_0_100M/bus_struct_reset]
+  connect_bd_net -net rst_ps8_0_100M_mb_reset [get_bd_pins microblaze_0/Reset] [get_bd_pins rst_ps8_0_100M/mb_reset]
+  connect_bd_net -net rst_ps8_0_100M_peripheral_aresetn [get_bd_pins AXI_width_conv_0/s00_axis_aresetn] [get_bd_pins AXI_width_conv_key_0/s00_axis_aresetn] [get_bd_pins RP_1/s_axi_aresetn] [get_bd_pins RP_2/s_axi_aresetn] [get_bd_pins RP_3/s_axi_aresetn] [get_bd_pins aes_0/m00_axi_aresetn] [get_bd_pins aes_0/reset_n] [get_bd_pins aes_0/s00_axi_aresetn] [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins axi_interconnect_1/ARESETN] [get_bd_pins axi_interconnect_1/M00_ARESETN] [get_bd_pins axi_interconnect_1/S00_ARESETN] [get_bd_pins axi_interconnect_1/S01_ARESETN] [get_bd_pins axi_interconnect_2/ARESETN] [get_bd_pins axi_interconnect_2/M00_ARESETN] [get_bd_pins axi_interconnect_2/M01_ARESETN] [get_bd_pins axi_interconnect_2/M02_ARESETN] [get_bd_pins axi_interconnect_2/S00_ARESETN] [get_bd_pins axi_uartlite_0/s_axi_aresetn] [get_bd_pins dfx_controller_0/icap_reset] [get_bd_pins dfx_controller_0/reset] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/M01_ARESETN] [get_bd_pins ps8_0_axi_periph/M02_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins ps8_0_axi_periph/S01_ARESETN] [get_bd_pins rst_ps8_0_100M/peripheral_aresetn]
+  connect_bd_net -net rst_ps8_0_100M_peripheral_reset [get_bd_pins iomodule_0/Rst] [get_bd_pins rst_ps8_0_100M/peripheral_reset]
+  connect_bd_net -net xlconstant_0_dout [get_bd_pins aes_0/dbg_ENCLEN] [get_bd_pins xlconstant_0/dout]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins rst_ps8_0_100M/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
 
   # Create address segments
+  assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces aes_0/m00_axi] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP0/HPC0_DDR_LOW] -force
+  assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces aes_0/m00_axi] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP0/HPC0_LPS_OCM] -force
+  assign_bd_address -offset 0x00000000 -range 0x000100000000 -target_address_space [get_bd_addr_spaces dfx_controller_0/Data] [get_bd_addr_segs aes_0/s00_axi/reg0] -force
+  assign_bd_address -offset 0x80020000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs axi_uartlite_0/S_AXI/Reg] -force
+  assign_bd_address -offset 0x80010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs dfx_controller_0/s_axi_reg/Reg] -force
+  assign_bd_address -offset 0x80000000 -range 0x00008000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs microblaze_0_local_memory/dlmb_bram_if_cntlr/SLMB/Mem] -force
+  assign_bd_address -offset 0x80000000 -range 0x00008000 -target_address_space [get_bd_addr_spaces microblaze_0/Instruction] [get_bd_addr_segs microblaze_0_local_memory/ilmb_bram_if_cntlr/SLMB/Mem] -force
+  assign_bd_address -offset 0x80030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs iomodule_0/SLMB/Reg] -force
+  assign_bd_address -offset 0x00000000 -range 0x80000000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP0/HPC0_DDR_LOW] -force
+  assign_bd_address -offset 0xFF000000 -range 0x01000000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs zynq_ultra_ps_e_0/SAXIGP0/HPC0_LPS_OCM] -force
   assign_bd_address -offset 0xA0010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_1/axi_gpio_0/S_AXI/Reg] -force
   assign_bd_address -offset 0xA0020000 -range 0x00010000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_2/axi_gpio_0/S_AXI/Reg] -force
   assign_bd_address -offset 0xA0030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs RP_3/axi_gpio_0/S_AXI/Reg] -force
@@ -1591,8 +1943,6 @@ make_wrapper -files [get_files my_axi_const44.bd] -import -top
 
 # Create wrapper file for my_axi_const33.bd
 make_wrapper -files [get_files my_axi_const33.bd] -import -top
-
-generate_target all [get_files design_1.bd]
 
 # Empty (no sources present)
 
@@ -1684,6 +2034,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const33_inst_0_synth_1]
 set_property -name "constrset" -value "my_axi_const33_inst_0" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # Create 'my_axi_const44_inst_2_synth_1' run (if not found)
@@ -1707,6 +2058,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const44_inst_2_synth_1]
 set_property -name "constrset" -value "my_axi_const44_inst_2" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # Create 'my_axi_const55_inst_2_synth_1' run (if not found)
@@ -1730,6 +2082,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const55_inst_2_synth_1]
 set_property -name "constrset" -value "my_axi_const55_inst_2" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # Create 'my_axi_const33_inst_2_synth_1' run (if not found)
@@ -1753,6 +2106,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const33_inst_2_synth_1]
 set_property -name "constrset" -value "my_axi_const33_inst_2" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # Create 'my_axi_const44_inst_0_synth_1' run (if not found)
@@ -1776,6 +2130,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const44_inst_0_synth_1]
 set_property -name "constrset" -value "my_axi_const44_inst_0" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # Create 'my_axi_const55_inst_1_synth_1' run (if not found)
@@ -1799,6 +2154,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const55_inst_1_synth_1]
 set_property -name "constrset" -value "my_axi_const55_inst_1" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # Create 'my_axi_const33_inst_1_synth_1' run (if not found)
@@ -1822,6 +2178,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const33_inst_1_synth_1]
 set_property -name "constrset" -value "my_axi_const33_inst_1" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # Create 'my_axi_const44_inst_1_synth_1' run (if not found)
@@ -1845,6 +2202,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const44_inst_1_synth_1]
 set_property -name "constrset" -value "my_axi_const44_inst_1" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # Create 'my_axi_const55_inst_0_synth_1' run (if not found)
@@ -1868,6 +2226,7 @@ if { $obj != "" } {
 }
 set obj [get_runs my_axi_const55_inst_0_synth_1]
 set_property -name "constrset" -value "my_axi_const55_inst_0" -objects $obj
+set_property -name "needs_refresh" -value "1" -objects $obj
 set_property -name "strategy" -value "Vivado Synthesis Defaults" -objects $obj
 
 # set the current synth run

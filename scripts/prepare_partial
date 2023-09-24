@@ -1,0 +1,26 @@
+# Specify the folder path where the files are located
+set folder_path "/home/luiscarlos/Desktop/ultra/secure_tiles2/vitis/pfm/bitstreams/"
+
+# Create the "output" directory inside the specified folder if it doesn't exist
+file mkdir "${folder_path}output"
+
+# Use glob to get a list of filenames in the folder that match the specified pattern
+set input_files [glob "${folder_path}design_1_i_RP_*_my_axi_const*_inst_*_partial.bin"]
+
+# Loop through each input filename
+foreach input_file $input_files {
+    # Extract RP number and constNN number from the filename using regular expressions
+    if {[regexp {design_1_i_RP_(\d+)_my_axi_const(\d+)_inst_(\d+)_partial.bin} $input_file -> rp_number const_number inst_number]} {
+        # Generate the output filename in the format "rpX_NN.bin" inside the "output" directory
+        set output_filename "${folder_path}output/rp${rp_number}_${const_number}.bin"
+
+        # Execute the command with the input and output filenames
+        dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $input_file -o $output_filename
+
+        # Optionally, print the result for each file
+        puts "Processed $input_file -> $output_filename"
+    } else {
+        # Handle the case where the filename does not match the expected pattern
+        puts "Warning: File $input_file does not match the expected pattern."
+    }
+}
