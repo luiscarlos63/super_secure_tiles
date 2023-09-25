@@ -9,3 +9,4 @@ vivado.jou
 vivado.log
 hs_err*
 vitis_project/*
+vitis_/*
