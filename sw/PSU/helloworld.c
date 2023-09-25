@@ -54,7 +54,7 @@
 #include "xil_cache.h"
 #include <xil_types.h>
 
-#include "dfx_controller.h"
+//#include "dfx_controller.h"trhtrhtrjty
 
 
 // ----------------------------- File names ---------------------------------
@@ -74,32 +74,26 @@ int main()
 {
 
 	u32 	  * pcapCtrlPtr 	= (u32*)0x00FFCA3008;
-	u_int32_t * RP_1_addr 	= (u_int32_t*)0xA0010000;
-	u_int32_t * RP_2_addr 	= (u_int32_t*)0xA0020000;
-	u_int32_t * RP_3_addr 	= (u_int32_t*)0xA0030000;
-
-	uint32_t * GPIO_Value_addr = (u_int32_t*)0xA0040000;
-	uint32_t GPIO_out = 0x03;
 
 	int command = 0;
 	uint32_t tile;
 	uint8_t status;
 
-	bitstream_t bit_ip_const33_rp_1;
-	bitstream_t bit_ip_const44_rp_1;
-	bitstream_t bit_ip_const55_rp_1;
-	bitstream_t bit_ip_const33_rp_2;
-	bitstream_t bit_ip_const44_rp_2;
-	bitstream_t bit_ip_const55_rp_2;
-	bitstream_t bit_ip_const33_rp_3;
-	bitstream_t bit_ip_const44_rp_3;
-	bitstream_t bit_ip_const55_rp_3;
-
-	ip_t ip_const33;
-	ip_t ip_const44;
-	ip_t ip_const55;
-
-	dfx_t dfx;
+//	bitstream_t bit_ip_const33_rp_1;
+//	bitstream_t bit_ip_const44_rp_1;
+//	bitstream_t bit_ip_const55_rp_1;
+//	bitstream_t bit_ip_const33_rp_2;
+//	bitstream_t bit_ip_const44_rp_2;
+//	bitstream_t bit_ip_const55_rp_2;
+//	bitstream_t bit_ip_const33_rp_3;
+//	bitstream_t bit_ip_const44_rp_3;
+//	bitstream_t bit_ip_const55_rp_3;
+//
+//	ip_t ip_const33;
+//	ip_t ip_const44;
+//	ip_t ip_const55;
+//
+//	dfx_t dfx;
 
 
 
@@ -118,35 +112,35 @@ int main()
 
 
 	//------------------------- IPs init -------------------------------------------------
-    ip_init_ip(&ip_const33, 1);
-    ip_init_ip(&ip_const44, 2);
-    ip_init_ip(&ip_const55, 3);
-
-    //-------------------------loading Bitstreams  to memory and associate to the IP -----
-    bitstream_init(&bit_ip_const33_rp_1, ip_const33_rp_1);
-    bitstream_init(&bit_ip_const33_rp_2, ip_const33_rp_2);
-    bitstream_init(&bit_ip_const33_rp_3, ip_const33_rp_3);
-    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_1, TILE_1_ID);
-    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_2, TILE_2_ID);
-    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_3, TILE_3_ID);
-
-    bitstream_init(&bit_ip_const44_rp_1, ip_const44_rp_1);
-    bitstream_init(&bit_ip_const44_rp_2, ip_const44_rp_2);
-    bitstream_init(&bit_ip_const44_rp_3, ip_const44_rp_3);
-    ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_1, TILE_1_ID);
-	ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_2, TILE_2_ID);
-	ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_3, TILE_3_ID);
-
-    bitstream_init(&bit_ip_const55_rp_1, ip_const55_rp_1);
-    bitstream_init(&bit_ip_const55_rp_2, ip_const55_rp_2);
-    bitstream_init(&bit_ip_const55_rp_3, ip_const55_rp_3);
-	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_1, TILE_1_ID);
-	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_2, TILE_2_ID);
-	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_3, TILE_3_ID);
+//    ip_init_ip(&ip_const33, 1);
+//    ip_init_ip(&ip_const44, 2);
+//    ip_init_ip(&ip_const55, 3);
+//
+//    //-------------------------loading Bitstreams  to memory and associate to the IP -----
+//    bitstream_init(&bit_ip_const33_rp_1, ip_const33_rp_1);
+//    bitstream_init(&bit_ip_const33_rp_2, ip_const33_rp_2);
+//    bitstream_init(&bit_ip_const33_rp_3, ip_const33_rp_3);
+//    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_1, TILE_1_ID);
+//    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_2, TILE_2_ID);
+//    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_3, TILE_3_ID);
+//
+//    bitstream_init(&bit_ip_const44_rp_1, ip_const44_rp_1);
+//    bitstream_init(&bit_ip_const44_rp_2, ip_const44_rp_2);
+//    bitstream_init(&bit_ip_const44_rp_3, ip_const44_rp_3);
+//    ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_1, TILE_1_ID);
+//	ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_2, TILE_2_ID);
+//	ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_3, TILE_3_ID);
+//
+//    bitstream_init(&bit_ip_const55_rp_1, ip_const55_rp_1);
+//    bitstream_init(&bit_ip_const55_rp_2, ip_const55_rp_2);
+//    bitstream_init(&bit_ip_const55_rp_3, ip_const55_rp_3);
+//	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_1, TILE_1_ID);
+//	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_2, TILE_2_ID);
+//	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_3, TILE_3_ID);
     printf("\nBitstreams loaded into memory ");
 
-    printf("bit_ip_const44_rp_2 - %X  - %X", bit_ip_const44_rp_2.data, bit_ip_const44_rp_2.size);
-    printf("bit_ip_const55_rp_2 - %X  - %X", bit_ip_const55_rp_2.data, bit_ip_const55_rp_2.size);
+//    printf("bit_ip_const44_rp_2 - %X  - %X", bit_ip_const44_rp_2.data, bit_ip_const44_rp_2.size);
+//    printf("bit_ip_const55_rp_2 - %X  - %X", bit_ip_const55_rp_2.data, bit_ip_const55_rp_2.size);
 
     //-------------------------- Set IPs --------------------------------------------------
 
@@ -154,10 +148,10 @@ int main()
     printf("\nIPs created");
 
     //-------------------------- DFX init -------------------------------------------------
-	if(dfx_init(&dfx)){
-		printf("Error initializaing DFX Controller");
-		return -1;
-	}
+//	if(dfx_init(&dfx)){
+//		printf("Error initializaing DFX Controller");
+//		return -1;
+//	}
 
     print("\n\r\n\r*** Dynamic Function eXchange SW Trigger ***\n\r");
 
@@ -176,15 +170,15 @@ int main()
 		switch(command)
 		{
 			case 1:
-				status = *RP_1_addr;
+//				status = Xil_In32(TILE_1_ADDR);
 				printf("\nRP_1 value = %X", status);
 				break;
 			case 2:
-				status = *RP_2_addr;
+//				status = Xil_In32(TILE_2_ADDR);
 				printf("\nRP_2 value = %X", status);
 				break;
 			case 3:
-				status = *RP_3_addr;
+//				status = Xil_In32(TILE_3_ADDR);
 				printf("\nRP_3 value = %X", status);
 				break;
 				/*
@@ -193,22 +187,17 @@ int main()
 			case 4:
 				printf("\n\rLoad IP const_33 what tile:");
 				scanf("%d", &tile);
-				dfx_load_ip(&dfx, &ip_const33, tile);
+//				dfx_load_ip(&dfx, &ip_const33, tile);
 				break;
 			case 5:
 				printf("\n\rLoad IP const_44 what tile:");
 				scanf("%d", &tile);
-				dfx_load_ip(&dfx, &ip_const44, tile);
+//				dfx_load_ip(&dfx, &ip_const44, tile);
 				break;
 			case 6:
 				printf("\n\rLoad IP const_55 what tile:");
 				scanf("%d", &tile);
-				dfx_load_ip(&dfx, &ip_const55, tile);
-				break;
-			case 7:
-				printf("\n\rValue to GPIO:");
-				scanf("%d", &GPIO_out);
-				*GPIO_Value_addr = GPIO_out;
+//				dfx_load_ip(&dfx, &ip_const55, tile);
 				break;
 		default: break;
 		}	// end of "switch(command)"

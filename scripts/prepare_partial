@@ -1,5 +1,20 @@
+source [get_property REPOSITORY [get_ipdefs *dfx_controller:1.0]]/xilinx/dfx_controller_v1_0/tcl/api.tcl -notrace
+#set binDir "/home/luiscarlos/Desktop/ultra/secure_tiles2/vitis/pfm/bitstreams"
+
+
+
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_1_my_axi_const33_inst_0_partial.bin -o $binDir/rp1_33.bin
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_1_my_axi_const44_inst_0_partial.bin -o $binDir/rp1_44.bin
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_1_my_axi_const55_inst_0_partial.bin -o $binDir/rp1_55.bin
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_2_my_axi_const33_inst_2_partial.bin -o $binDir/rp2_33.bin
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_2_my_axi_const44_inst_1_partial.bin -o $binDir/rp2_44.bin
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_2_my_axi_const55_inst_1_partial.bin -o $binDir/rp2_55.bin
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_3_my_axi_const33_inst_1_partial.bin -o $binDir/rp3_33.bin
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_3_my_axi_const44_inst_2_partial.bin -o $binDir/rp3_44.bin
+#dfx_controller_v1_0::format_bin_for_icap -bs 1 -i $binDir/design_1_i_RP_3_my_axi_const55_inst_2_partial.bin -o $binDir/rp3_55.bin
+
 # Specify the folder path where the files are located
-set folder_path "/home/luiscarlos/Desktop/ultra/secure_tiles2/vitis/pfm/bitstreams/"
+set folder_path "/home/luiscarlos/Desktop/ultra/secure_tiles3/vitis/pfm/bitstreams/"
 
 # Create the "output" directory inside the specified folder if it doesn't exist
 file mkdir "${folder_path}output"
