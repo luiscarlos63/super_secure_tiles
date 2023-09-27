@@ -1,0 +1,98 @@
+/*
+
+Xilinx Vitis v2021.2.0 (64-bit) [Major: 2021, Minor: 2]
+SW Build 3363750 on 2021-10-16-13:10:08
+
+Process ID (PID): 71241
+License: Customer
+
+Current time: 	Wed Sep 27 23:43:50 WEST 2023
+Time zone: 	Western European Standard Time (Europe/Lisbon)
+
+OS: Ubuntu
+OS Version: 5.15.0-84-generic
+OS Architecture: amd64
+Available processors (cores): 4
+
+Display: :0
+Screen size: 2560x1440
+Available screens: 2
+Available disk space: 145 GB
+
+Java version: 	11.0.11 64-bit
+Java home: 	/tools/Xilinx/Vitis/2021.2/tps/lnx64/jre11.0.11_9
+Java executable location: 	/tools/Xilinx/Vitis/2021.2/tps/lnx64/jre11.0.11_9/bin/java
+Java initial memory (-Xms): 	64 MB
+Java maximum memory (-Xmx):	 1,024 MB
+
+Java library paths: /tools/Xilinx/Vitis/2021.2/tps/lnx64/javafx-sdk-11.0.2/lib:/tools/Xilinx/Vitis/2021.2/lib/lnx64.o/Ubuntu/20:/tools/Xilinx/Vitis/2021.2/lib/lnx64.o/Ubuntu:/tools/Xilinx/Vitis/2021.2/lib/lnx64.o:/tools/Xilinx/Vitis/2021.2/tps/lnx64/jre11.0.11_9/lib/:/tools/Xilinx/Vitis/2021.2/tps/lnx64/jre11.0.11_9/lib//server:/tools/Xilinx/Vitis/2021.2/lib/lnx64.o:/tools/Xilinx/Vitis/2021.2/lib/lnx64.o/Ubuntu/20:/tools/Xilinx/Vitis/2021.2/lib/lnx64.o/Ubuntu:/tools/Xilinx/Vitis/2021.2/lib/lnx64.o:/tools/Xilinx/Vitis/2021.2/tps/lnx64/python-3.8.3/lib:/tools/Xilinx/Vitis/2021.2/aietools/lib/lnx64.o:/tools/Xilinx/Vitis/2021.2/bin/../lnx64/tools/dot/lib:/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib
+
+Java class paths: /tools/Xilinx/Vitis/2021.2/eclipse/lnx64.o//plugins/org.eclipse.equinox.launcher_1.5.700.v20200207-2156.jar
+LD_LIBRARY_PATH: /tools/Xilinx/Vitis
+
+User name: 	luiscarlos
+User home directory: /home/luiscarlos
+User working directory: /home/luiscarlos/Desktop/ultra/super_secure_tiles
+User country: 	US
+User language: 	en
+User locale: 	en_US
+
+RDI_BASEROOT: /tools/Xilinx/Vitis
+HDI_APPROOT: /tools/Xilinx/Vitis/2021.2
+RDI_DATADIR: /tools/Xilinx/Vitis/2021.2/data
+RDI_BINDIR: /tools/Xilinx/Vitis/2021.2/bin
+
+Vitis preferences directory: /home/luiscarlos/.Xilinx/Vitis/2021.2/
+Vitis workspace directory: /home/luiscarlos/Desktop/ultra/super_secure_tiles/vitis_project/pfm
+Vitis workspace log file location: /home/luiscarlos/Desktop/ultra/super_secure_tiles/vitis_project/pfm/.metadata/.log
+Engine tmp dir: 	
+
+Xilinx Environment Variables
+----------------------------
+XILINX_DSP: 
+XILINX_HLS: /tools/Xilinx/Vitis_HLS/2021.2
+XILINX_PLANAHEAD: /tools/Xilinx/Vitis/2021.2
+XILINX_SDK: /tools/Xilinx/Vitis/2021.2
+XILINX_VITIS: /tools/Xilinx/Vitis/2021.2
+XILINX_VIVADO: /tools/Xilinx/Vivado/2021.2
+XILINX_VIVADO_HLS: /tools/Xilinx/Vivado/2021.2
+_RDI_DONT_SET_XILINX_AS_PATH: True
+
+
+Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
+
+*/
+
+selectTreeTable("Debug", "sst_v4_app_system > sst_v4_app_blaze", "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectTreeTable("sst_v4_app_system", "sst_v4_app_system > sst_v4_app_blaze", EventType.POPUP_TRIGGER_CLICK, "Explorer", "ProjectExplorer", "TreeViewer.NavigatorContentServiceContentProvider");
+selectMenuItem("Debug As", "Explorer", "ProjectExplorer", "MenuItem.DEBUG_AS");
+selectMenuItem("1 Launch Hardware", "sst_v4_app_system", "WorkbenchWindow", "MenuItem.1_LAUNCH_HARDWARE");
+activateView("Debug", "LaunchView", "CTabItem.DEBUG");
+selectTreeTable("Debug", "sst_v4_app_system > sst_v4_app_a530", "Debug", "LaunchView", "TreeViewer.NavigatorContentServiceContentProvider");
+selectTree("MicroBlaze #0", "SystemDebugger_sst_v4_app_system_Standalone > PS TAP > PL > MicroBlaze Debug Module at USER2", "Debug", "LaunchView", "Tree.LaunchManager");
+selectToolBarButton("Resume", "sst_v4_app_blaze", "WorkbenchWindow", "ToolItem.RESUME");
+selectToolBarButton("Suspend", "sst_v4_app_blaze", "WorkbenchWindow", "ToolItem.SUSPEND");
+activateView("Memory", "MemoryView", "CTabItem.MEMORY");
+selectToolBarButton("Add Memory Monitor", "Memory", "MemoryView", "ToolItem.ADD_MEMORY_MONITOR");
+selectTree("0x80030000", EventType.DOUBLE_CLICK, "Memory", "MemoryView", "Tree.TCFModel$15");
+activateView("helloworld.c", "sst_v4_app_blaze/src/helloworld.c", "CEditor", "CTabItem.HELLOWORLD_C");
+selectTextEditor("helloworld.c", "sst_v4_app_blaze/src/helloworld.c", EventType.POPUP_TRIGGER_CLICK, "CEditor", "StyledText.HELLOWORLD_C");
+selectMenuItem("Open Declaration", "helloworld.c", "WorkbenchWindow", "MenuItem.OPEN_DECLARATION");
+selectButton("OK", "Open Declaration", "Button", "OK");
+selectTextEditor("inbyte.c", "sst_v4/microblaze_0/stand_blaze/bsp/microblaze_0/li", EventType.POPUP_TRIGGER_CLICK, "CEditor", "StyledText.INBYTE_C");
+selectMenuItem("Open Declaration", "inbyte.c", "WorkbenchWindow", "MenuItem.OPEN_DECLARATION");
+selectToolBarButton("Resume", "sst_v4", "WorkbenchWindow", "ToolItem.RESUME");
+closeView("xil_io.h", "sst_v4/microblaze_0/stand_blaze/bsp/microblaze_0/include/xil_io.h", "CEditor", "CTabItem.XIL_IO_H");
+closeView("xiomodule_l.c", "sst_v4/microblaze_0/stand_blaze/bsp/microblaze_0/libsrc/iomodule_v2_12/src/xiomodule_l.c", "CEditor", "CTabItem.XIOMODULE_L_C");
+closeView("inbyte.c", "sst_v4/microblaze_0/stand_blaze/bsp/microblaze_0/libsrc/standalone_v7_6/src/inbyte.c", "CEditor", "CTabItem.INBYTE_C");
+closeView("microblaze_sleep.c", "sst_v4/microblaze_0/stand_blaze/bsp/microblaze_0/libsrc/standalone_v7_6/src/microblaze_sleep.c", "CEditor", "CTabItem.MICROBLAZE_SLEEP_C");
+selectToolBarButton("Suspend", "sst_v4_app_blaze", "WorkbenchWindow", "ToolItem.SUSPEND");
+selectToolBarButton("Resume", "sst_v4", "WorkbenchWindow", "ToolItem.RESUME");
+selectToolBarButton("Step Into", "sst_v4", "WorkbenchWindow", "ToolItem.STEP_INTO");
+selectToolBarButton("Resume", "sst_v4", "WorkbenchWindow", "ToolItem.RESUME");
+selectToolBarButton("Resume", "sst_v4_app_blaze", "WorkbenchWindow", "ToolItem.RESUME");
+activateView("Breakpoints", "BreakpointsView", "CTabItem.BREAKPOINTS");
+selectToolBarButton("Remove All Breakpoints", "Breakpoints", "BreakpointsView", "ToolItem.REMOVE_ALL_BREAKPOINTS");
+selectButton("Remove", "Remove All Breakpoints", "MessageDialogWithToggle", "Button.REMOVE");
+activateView("Variables", "VariablesView", "CTabItem.VARIABLES");
+selectToolBarButton("Resume", "sst_v4", "WorkbenchWindow", "ToolItem.RESUME");
