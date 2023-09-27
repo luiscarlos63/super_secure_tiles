@@ -18,6 +18,7 @@
 proc checkRequiredFiles { origin_dir} {
   set status true
   set files [list \
+ "[file normalize "$origin_dir/src/design/icap_inst.v"]"\
  "[file normalize "$origin_dir/src/design/aes_core.v"]"\
  "[file normalize "$origin_dir/src/design/aes_decipher_block.v"]"\
  "[file normalize "$origin_dir/src/design/aes_encipher_block.v"]"\
@@ -26,7 +27,6 @@ proc checkRequiredFiles { origin_dir} {
  "[file normalize "$origin_dir/src/design/aes_sbox.v"]"\
  "[file normalize "$origin_dir/src/design/fifo_buff.v"]"\
  "[file normalize "$origin_dir/src/design/aes.v"]"\
- "[file normalize "$origin_dir/src/design/icap_inst.v"]"\
  "[file normalize "$origin_dir/src/design/width_conv.v"]"\
  "[file normalize "$origin_dir/src/constraints/IO_constraints.xdc"]"\
  "[file normalize "$origin_dir/src/constraints/pblock_constraints.xdc"]"\
@@ -133,6 +133,8 @@ set_property -name "ip_cache_permissions" -value "read write" -objects $obj
 set_property -name "ip_output_repo" -value "$proj_dir/${_xil_proj_name_}.cache/ip" -objects $obj
 set_property -name "mem.enable_memory_map_generation" -value "1" -objects $obj
 set_property -name "platform.board_id" -value "ultra96v2" -objects $obj
+set_property -name "platform.vendor" -value "xilinx.com" -objects $obj
+set_property -name "platform.version" -value "1.0" -objects $obj
 set_property -name "pr_flow" -value "1" -objects $obj
 set_property -name "revised_directory_structure" -value "1" -objects $obj
 set_property -name "sim.central_dir" -value "$proj_dir/${_xil_proj_name_}.ip_user_files" -objects $obj
@@ -148,6 +150,7 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
 # Set 'sources_1' fileset object
 set obj [get_filesets sources_1]
 set files [list \
+ [file normalize "${origin_dir}/src/design/icap_inst.v"] \
  [file normalize "${origin_dir}/src/design/aes_core.v"] \
  [file normalize "${origin_dir}/src/design/aes_decipher_block.v"] \
  [file normalize "${origin_dir}/src/design/aes_encipher_block.v"] \
@@ -156,7 +159,6 @@ set files [list \
  [file normalize "${origin_dir}/src/design/aes_sbox.v"] \
  [file normalize "${origin_dir}/src/design/fifo_buff.v"] \
  [file normalize "${origin_dir}/src/design/aes.v"] \
- [file normalize "${origin_dir}/src/design/icap_inst.v"] \
  [file normalize "${origin_dir}/src/design/width_conv.v"] \
 ]
 add_files -norecurse -fileset $obj $files
@@ -197,6 +199,8 @@ set_property -name "file_type" -value "XDC" -objects $file_obj
 
 # Set 'constrs_1' fileset properties
 set obj [get_filesets constrs_1]
+set_property -name "target_constrs_file" -value "[file normalize "$origin_dir/src/constraints/IO_constraints.xdc"]" -objects $obj
+set_property -name "target_ucf" -value "[file normalize "$origin_dir/src/constraints/IO_constraints.xdc"]" -objects $obj
 
 # Create 'sim_1' fileset (if not found)
 if {[string equal [get_filesets -quiet sim_1] ""]} {
@@ -225,6 +229,152 @@ set obj [get_filesets utils_1]
 
 
 # Adding sources referenced in BDs, if not already added
+
+
+# Proc to create BD my_axi_const33
+proc cr_bd_my_axi_const33 { parentCell } {
+
+  # CHANGE DESIGN NAME HERE
+  set design_name my_axi_const33
+
+  common::send_gid_msg -ssname BD::TCL -id 2010 -severity "INFO" "Currently there is no design <$design_name> in project, so creating one..."
+
+  create_bd_design $design_name
+
+  set bCheckIPsPassed 1
+  ##################################################################
+  # CHECK IPs
+  ##################################################################
+  set bCheckIPs 1
+  if { $bCheckIPs == 1 } {
+     set list_check_ips "\ 
+  xilinx.com:ip:axi_gpio:2.0\
+  xilinx.com:ip:xlconstant:1.1\
+  "
+
+   set list_ips_missing ""
+   common::send_gid_msg -ssname BD::TCL -id 2011 -severity "INFO" "Checking if the following IPs exist in the project's IP catalog: $list_check_ips ."
+
+   foreach ip_vlnv $list_check_ips {
+      set ip_obj [get_ipdefs -all $ip_vlnv]
+      if { $ip_obj eq "" } {
+         lappend list_ips_missing $ip_vlnv
+      }
+   }
+
+   if { $list_ips_missing ne "" } {
+      catch {common::send_gid_msg -ssname BD::TCL -id 2012 -severity "ERROR" "The following IPs are not found in the IP Catalog:\n  $list_ips_missing\n\nResolution: Please add the repository containing the IP(s) to the project." }
+      set bCheckIPsPassed 0
+   }
+
+  }
+
+  if { $bCheckIPsPassed != 1 } {
+    common::send_gid_msg -ssname BD::TCL -id 2023 -severity "WARNING" "Will not continue with creation of design due to the error(s) above."
+    return 3
+  }
+
+  variable script_folder
+
+  if { $parentCell eq "" } {
+     set parentCell [get_bd_cells /]
+  }
+
+  # Get object for parentCell
+  set parentObj [get_bd_cells $parentCell]
+  if { $parentObj == "" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
+     return
+  }
+
+  # Make sure parentObj is hier blk
+  set parentType [get_property TYPE $parentObj]
+  if { $parentType ne "hier" } {
+     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
+     return
+  }
+
+  # Save current instance; Restore later
+  set oldCurInst [current_bd_instance .]
+
+  # Set parent object as current
+  current_bd_instance $parentObj
+
+
+  # Create interface ports
+  set S_AXI [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 S_AXI ]
+  set_property -dict [ list \
+   CONFIG.ADDR_WIDTH {16} \
+   CONFIG.ARUSER_WIDTH {0} \
+   CONFIG.AWUSER_WIDTH {0} \
+   CONFIG.BUSER_WIDTH {0} \
+   CONFIG.DATA_WIDTH {32} \
+   CONFIG.HAS_BRESP {1} \
+   CONFIG.HAS_BURST {0} \
+   CONFIG.HAS_CACHE {0} \
+   CONFIG.HAS_LOCK {0} \
+   CONFIG.HAS_PROT {0} \
+   CONFIG.HAS_QOS {0} \
+   CONFIG.HAS_REGION {0} \
+   CONFIG.HAS_RRESP {1} \
+   CONFIG.HAS_WSTRB {1} \
+   CONFIG.ID_WIDTH {0} \
+   CONFIG.MAX_BURST_LENGTH {1} \
+   CONFIG.NUM_READ_OUTSTANDING {1} \
+   CONFIG.NUM_READ_THREADS {1} \
+   CONFIG.NUM_WRITE_OUTSTANDING {1} \
+   CONFIG.NUM_WRITE_THREADS {1} \
+   CONFIG.PROTOCOL {AXI4LITE} \
+   CONFIG.READ_WRITE_MODE {READ_WRITE} \
+   CONFIG.RUSER_BITS_PER_BYTE {0} \
+   CONFIG.RUSER_WIDTH {0} \
+   CONFIG.SUPPORTS_NARROW_BURST {0} \
+   CONFIG.WUSER_BITS_PER_BYTE {0} \
+   CONFIG.WUSER_WIDTH {0} \
+   ] $S_AXI
+
+
+  # Create ports
+  set s_axi_aclk [ create_bd_port -dir I -type clk -freq_hz 100000000 s_axi_aclk ]
+  set s_axi_aresetn [ create_bd_port -dir I -type rst s_axi_aresetn ]
+
+  # Create instance: axi_gpio_0, and set properties
+  set axi_gpio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0 ]
+  set_property -dict [ list \
+   CONFIG.C_ALL_INPUTS {1} \
+ ] $axi_gpio_0
+
+  # Create instance: xlconstant_0, and set properties
+  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
+  set_property -dict [ list \
+   CONFIG.CONST_VAL {0x33} \
+   CONFIG.CONST_WIDTH {32} \
+ ] $xlconstant_0
+
+  # Create interface connections
+  connect_bd_intf_net -intf_net S_AXI_1 [get_bd_intf_ports S_AXI] [get_bd_intf_pins axi_gpio_0/S_AXI]
+
+  # Create port connections
+  connect_bd_net -net s_axi_aclk_1 [get_bd_ports s_axi_aclk] [get_bd_pins axi_gpio_0/s_axi_aclk]
+  connect_bd_net -net s_axi_aresetn_1 [get_bd_ports s_axi_aresetn] [get_bd_pins axi_gpio_0/s_axi_aresetn]
+  connect_bd_net -net xlconstant_0_dout [get_bd_pins axi_gpio_0/gpio_io_i] [get_bd_pins xlconstant_0/dout]
+
+  # Create address segments
+  assign_bd_address -offset 0x00000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces S_AXI] [get_bd_addr_segs axi_gpio_0/S_AXI/Reg] -force
+
+
+  # Restore current instance
+  current_bd_instance $oldCurInst
+
+  validate_bd_design
+  save_bd_design
+  close_bd_design $design_name 
+}
+# End of cr_bd_my_axi_const33()
+cr_bd_my_axi_const33 ""
+set_property REGISTERED_WITH_MANAGER "1" [get_files my_axi_const33.bd ] 
+set_property SYNTH_CHECKPOINT_MODE "Hierarchical" [get_files my_axi_const33.bd ] 
+
 
 
 # Proc to create BD my_axi_const55
@@ -517,152 +667,9 @@ cr_bd_my_axi_const44 ""
 set_property REGISTERED_WITH_MANAGER "1" [get_files my_axi_const44.bd ] 
 set_property SYNTH_CHECKPOINT_MODE "Hierarchical" [get_files my_axi_const44.bd ] 
 
-
-
-# Proc to create BD my_axi_const33
-proc cr_bd_my_axi_const33 { parentCell } {
-
-  # CHANGE DESIGN NAME HERE
-  set design_name my_axi_const33
-
-  common::send_gid_msg -ssname BD::TCL -id 2010 -severity "INFO" "Currently there is no design <$design_name> in project, so creating one..."
-
-  create_bd_design $design_name
-
-  set bCheckIPsPassed 1
-  ##################################################################
-  # CHECK IPs
-  ##################################################################
-  set bCheckIPs 1
-  if { $bCheckIPs == 1 } {
-     set list_check_ips "\ 
-  xilinx.com:ip:axi_gpio:2.0\
-  xilinx.com:ip:xlconstant:1.1\
-  "
-
-   set list_ips_missing ""
-   common::send_gid_msg -ssname BD::TCL -id 2011 -severity "INFO" "Checking if the following IPs exist in the project's IP catalog: $list_check_ips ."
-
-   foreach ip_vlnv $list_check_ips {
-      set ip_obj [get_ipdefs -all $ip_vlnv]
-      if { $ip_obj eq "" } {
-         lappend list_ips_missing $ip_vlnv
-      }
-   }
-
-   if { $list_ips_missing ne "" } {
-      catch {common::send_gid_msg -ssname BD::TCL -id 2012 -severity "ERROR" "The following IPs are not found in the IP Catalog:\n  $list_ips_missing\n\nResolution: Please add the repository containing the IP(s) to the project." }
-      set bCheckIPsPassed 0
-   }
-
-  }
-
-  if { $bCheckIPsPassed != 1 } {
-    common::send_gid_msg -ssname BD::TCL -id 2023 -severity "WARNING" "Will not continue with creation of design due to the error(s) above."
-    return 3
-  }
-
-  variable script_folder
-
-  if { $parentCell eq "" } {
-     set parentCell [get_bd_cells /]
-  }
-
-  # Get object for parentCell
-  set parentObj [get_bd_cells $parentCell]
-  if { $parentObj == "" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2090 -severity "ERROR" "Unable to find parent cell <$parentCell>!"}
-     return
-  }
-
-  # Make sure parentObj is hier blk
-  set parentType [get_property TYPE $parentObj]
-  if { $parentType ne "hier" } {
-     catch {common::send_gid_msg -ssname BD::TCL -id 2091 -severity "ERROR" "Parent <$parentObj> has TYPE = <$parentType>. Expected to be <hier>."}
-     return
-  }
-
-  # Save current instance; Restore later
-  set oldCurInst [current_bd_instance .]
-
-  # Set parent object as current
-  current_bd_instance $parentObj
-
-
-  # Create interface ports
-  set S_AXI [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 S_AXI ]
-  set_property -dict [ list \
-   CONFIG.ADDR_WIDTH {16} \
-   CONFIG.ARUSER_WIDTH {0} \
-   CONFIG.AWUSER_WIDTH {0} \
-   CONFIG.BUSER_WIDTH {0} \
-   CONFIG.DATA_WIDTH {32} \
-   CONFIG.HAS_BRESP {1} \
-   CONFIG.HAS_BURST {0} \
-   CONFIG.HAS_CACHE {0} \
-   CONFIG.HAS_LOCK {0} \
-   CONFIG.HAS_PROT {0} \
-   CONFIG.HAS_QOS {0} \
-   CONFIG.HAS_REGION {0} \
-   CONFIG.HAS_RRESP {1} \
-   CONFIG.HAS_WSTRB {1} \
-   CONFIG.ID_WIDTH {0} \
-   CONFIG.MAX_BURST_LENGTH {1} \
-   CONFIG.NUM_READ_OUTSTANDING {1} \
-   CONFIG.NUM_READ_THREADS {1} \
-   CONFIG.NUM_WRITE_OUTSTANDING {1} \
-   CONFIG.NUM_WRITE_THREADS {1} \
-   CONFIG.PROTOCOL {AXI4LITE} \
-   CONFIG.READ_WRITE_MODE {READ_WRITE} \
-   CONFIG.RUSER_BITS_PER_BYTE {0} \
-   CONFIG.RUSER_WIDTH {0} \
-   CONFIG.SUPPORTS_NARROW_BURST {0} \
-   CONFIG.WUSER_BITS_PER_BYTE {0} \
-   CONFIG.WUSER_WIDTH {0} \
-   ] $S_AXI
-
-
-  # Create ports
-  set s_axi_aclk [ create_bd_port -dir I -type clk -freq_hz 100000000 s_axi_aclk ]
-  set s_axi_aresetn [ create_bd_port -dir I -type rst s_axi_aresetn ]
-
-  # Create instance: axi_gpio_0, and set properties
-  set axi_gpio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0 ]
-  set_property -dict [ list \
-   CONFIG.C_ALL_INPUTS {1} \
- ] $axi_gpio_0
-
-  # Create instance: xlconstant_0, and set properties
-  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
-  set_property -dict [ list \
-   CONFIG.CONST_VAL {0x33} \
-   CONFIG.CONST_WIDTH {32} \
- ] $xlconstant_0
-
-  # Create interface connections
-  connect_bd_intf_net -intf_net S_AXI_1 [get_bd_intf_ports S_AXI] [get_bd_intf_pins axi_gpio_0/S_AXI]
-
-  # Create port connections
-  connect_bd_net -net s_axi_aclk_1 [get_bd_ports s_axi_aclk] [get_bd_pins axi_gpio_0/s_axi_aclk]
-  connect_bd_net -net s_axi_aresetn_1 [get_bd_ports s_axi_aresetn] [get_bd_pins axi_gpio_0/s_axi_aresetn]
-  connect_bd_net -net xlconstant_0_dout [get_bd_pins axi_gpio_0/gpio_io_i] [get_bd_pins xlconstant_0/dout]
-
-  # Create address segments
-  assign_bd_address -offset 0x00000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces S_AXI] [get_bd_addr_segs axi_gpio_0/S_AXI/Reg] -force
-
-
-  # Restore current instance
-  current_bd_instance $oldCurInst
-
-  validate_bd_design
-  save_bd_design
-  close_bd_design $design_name 
+if { [get_files icap_inst.v] == "" } {
+  import_files -quiet -fileset sources_1 "$origin_dir/src/design/icap_inst.v"
 }
-# End of cr_bd_my_axi_const33()
-cr_bd_my_axi_const33 ""
-set_property REGISTERED_WITH_MANAGER "1" [get_files my_axi_const33.bd ] 
-set_property SYNTH_CHECKPOINT_MODE "Hierarchical" [get_files my_axi_const33.bd ] 
-
 if { [get_files aes_core.v] == "" } {
   import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes_core.v"
 }
@@ -686,9 +693,6 @@ if { [get_files fifo_buff.v] == "" } {
 }
 if { [get_files aes.v] == "" } {
   import_files -quiet -fileset sources_1 "$origin_dir/src/design/aes.v"
-}
-if { [get_files icap_inst.v] == "" } {
-  import_files -quiet -fileset sources_1 "$origin_dir/src/design/icap_inst.v"
 }
 if { [get_files width_conv.v] == "" } {
   import_files -quiet -fileset sources_1 "$origin_dir/src/design/width_conv.v"
@@ -1315,7 +1319,7 @@ RID {PRESENT 0 WIDTH 0} RUSER {PRESENT 0 WIDTH 0}} MODE slave}}\
    CONFIG.C_MMU_DTLB_SIZE {2} \
    CONFIG.C_MMU_ITLB_SIZE {1} \
    CONFIG.C_MMU_ZONES {2} \
-   CONFIG.C_NUMBER_OF_PC_BRK {0} \
+   CONFIG.C_NUMBER_OF_PC_BRK {8} \
    CONFIG.C_USE_REORDER_INSTR {0} \
    CONFIG.G_TEMPLATE_LIST {1} \
  ] $microblaze_0
@@ -2659,6 +2663,7 @@ set_property -name "options.warn_on_violation" -value "1" -objects $obj
 }
 set obj [get_runs impl_1]
 set_property -name "strategy" -value "Vivado Implementation Defaults" -objects $obj
+set_property -name "steps.write_bitstream.args.bin_file" -value "1" -objects $obj
 set_property -name "steps.write_bitstream.args.readback_file" -value "0" -objects $obj
 set_property -name "steps.write_bitstream.args.verbose" -value "0" -objects $obj
 
@@ -4877,6 +4882,7 @@ set_property -name "options.warn_on_violation" -value "1" -objects $obj
 }
 set obj [get_runs child_0_impl_1]
 set_property -name "strategy" -value "Vivado Implementation Defaults" -objects $obj
+set_property -name "steps.write_bitstream.args.bin_file" -value "1" -objects $obj
 set_property -name "steps.write_bitstream.args.readback_file" -value "0" -objects $obj
 set_property -name "steps.write_bitstream.args.verbose" -value "0" -objects $obj
 
@@ -5097,6 +5103,7 @@ set_property -name "options.warn_on_violation" -value "1" -objects $obj
 }
 set obj [get_runs child_1_impl_1]
 set_property -name "strategy" -value "Vivado Implementation Defaults" -objects $obj
+set_property -name "steps.write_bitstream.args.bin_file" -value "1" -objects $obj
 set_property -name "steps.write_bitstream.args.readback_file" -value "0" -objects $obj
 set_property -name "steps.write_bitstream.args.verbose" -value "0" -objects $obj
 

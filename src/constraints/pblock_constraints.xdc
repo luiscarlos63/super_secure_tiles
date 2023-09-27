@@ -20,3 +20,4 @@ resize_pblock [get_pblocks pblock_RP_3] -add {DSP48E2_X3Y12:DSP48E2_X4Y23}
 resize_pblock [get_pblocks pblock_RP_3] -add {RAMB18_X3Y12:RAMB18_X4Y23}
 resize_pblock [get_pblocks pblock_RP_3] -add {RAMB36_X3Y6:RAMB36_X4Y11}
 set_property SNAPPING_MODE ON [get_pblocks pblock_RP_3]
+
