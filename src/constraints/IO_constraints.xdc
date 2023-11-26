@@ -1,7 +1,7 @@
 set_property IOSTANDARD LVCMOS18 [get_ports {GPO1_0[0]}]
 set_property IOSTANDARD LVCMOS18 [get_ports uart_rtl_0_rxd]
 set_property IOSTANDARD LVCMOS18 [get_ports uart_rtl_0_txd]
-set_property PACKAGE_PIN E5 [get_ports {GPO1_0[0]}]
+set_property PACKAGE_PIN D7 [get_ports {GPO1_0[0]}]
 set_property PACKAGE_PIN A6 [get_ports uart_rtl_0_txd]
 set_property PACKAGE_PIN D5 [get_ports uart_rtl_0_rxd]
 
@@ -49,3 +49,6 @@ set_property PROHIBIT true [get_sites SLICE_X42Y59]
 set_property PROHIBIT true [get_sites SLICE_X43Y59]
 set_property PROHIBIT true [get_sites SLICE_X44Y59]
 set_property BITSTREAM.GENERAL.PERFRAMECRC YES [current_design]
+
+set_property IOSTANDARD LVCMOS18 [get_ports Interrupt_1]
+set_property PACKAGE_PIN F8 [get_ports Interrupt_1]
