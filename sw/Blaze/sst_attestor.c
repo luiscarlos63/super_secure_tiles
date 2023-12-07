@@ -45,56 +45,49 @@
  *   ps7_uart    115200 (configured by bootrom/bsp)
  */
 
+
+/***************************** Include Files *********************************/
 #include <stdio.h>
 #include "platform.h"
 #include "xil_printf.h"
-#include "xmbox.h"
+
 #include "sleep.h"  // Include the sleep header
 
-#include "xgpiops.h"
+#include "sst_io.h"
+
+/************************** Constant Definitions *****************************/
 
 
+/**************************** Type Definitions *******************************/
 
+
+/***************** Macros (Inline Functions) Definitions *********************/
+
+
+/************************** Variable Definitions *****************************/
+
+
+/************************** Function Prototypes ******************************/
+
+
+/*************************** Function Defines ********************************/
 
 int main()
 {
 
-	/*
-		 * TODO: TESTE
-		 * */
-		uint32_t outValue = 0;
-		uint32_t Output_Pin = 17;
-		XGpioPs Gpio;
-		XGpioPs_Config *ConfigPtr;
-		int32_t status = 0;
-
-		ConfigPtr = XGpioPs_LookupConfig(0);
-		status = XGpioPs_CfgInitialize(&Gpio, ConfigPtr,
-							ConfigPtr->BaseAddr);
-			if (status != XST_SUCCESS) {
-				return XST_FAILURE;
-			}
-
-
+	// ----- Initializations -----
     init_platform();
 
-    print("Hello World\n\r");
-    print("Successfully ran Hello World application");
+    sst_ioPsGpioInit();
+
+
 
     while(1)
     {
-    	Xil_Out32(0x80010010, 1);
-    	    	usleep(50000);
-    	    	Xil_Out32(0x80010010, 0);
-    	    	usleep(50000);
-
-
-
-    	    	XGpioPs_SetDirectionPin(&Gpio, Output_Pin, 1);
-    	    					XGpioPs_SetOutputEnablePin(&Gpio, Output_Pin, 1);
-
-    	    					/* Set the GPIO output to be low. */
-    	    					XGpioPs_WritePin(&Gpio, Output_Pin, outValue);
+    	usleep(300000);
+    	sst_ioPsGpioSetLED(SST_LED_1, 0);
+    	usleep(300000);
+    	sst_ioPsGpioSetLED(SST_LED_1, 1);
     }
 
     cleanup_platform();
