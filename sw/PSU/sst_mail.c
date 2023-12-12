@@ -104,6 +104,7 @@ char data[] __attribute__ ((aligned (4))) = {
 
 static XMbox Mbox;
 
+
 #ifndef TESTAPP_GEN
 static XIntc IntcInst;
 #endif
@@ -116,7 +117,7 @@ static volatile int IntrERRCount = 0;
 char RecvMsg[MSGSIZ] __attribute__ ((aligned(4)));
 
 u32 Temp1pad = 0;		/* alignment */
-char *ProducerHello = "Hello! The Producer greets the Consumer...";
+char *ProducerHello = "E Que! MEUS Putoscer HOSTAs the Consumer..";
 
 
 /************************** Function Prototypes ******************************/
@@ -145,6 +146,7 @@ static int MailboxSetupIntrSystem(XIntc *IntcInstancePtr,
 * @note		None
 *
 ******************************************************************************/
+
 int myMailboxExample()
 {
 	printf ("MailboxExample :\tStarts for CPU %d.\r\n", MY_CPU_ID);
@@ -160,6 +162,7 @@ int myMailboxExample()
 
 	return XST_SUCCESS;
 }
+
 
 /*****************************************************************************/
 /**
@@ -454,13 +457,36 @@ static int MailboxSetupIntrSystem(XIntc *IntcInstancePtr,
 					 XMB_IX_STA | XMB_IX_RTA | XMB_IX_ERR);
 
 
-
+#ifndef TESTAPP_GEN
+	/*
+	 * Start the interrupt controller such that interrupts are enabled for
+	 * all devices that cause interrupts. Specify real mode so that
+	 * the Mbox can generate interrupts through
+	 * the interrupt controller
+	 */
+	Status = XIntc_Start(IntcInstancePtr, XIN_REAL_MODE);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+#endif
 
 	/*
 	 * Enable the interrupt for the Mbox
 	 */
 	XIntc_Enable(IntcInstancePtr, MboxIntrId);
 
+#ifndef TESTAPP_GEN
+	Xil_ExceptionInit();
+
+	Xil_ExceptionEnable();
+
+	/*
+	 * Register the interrupt controller handler with the exception table.
+	 */
+	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+				(Xil_ExceptionHandler)XIntc_InterruptHandler,
+				IntcInstancePtr);
+#endif /* TESTAPP_GEN */
 
 	return XST_SUCCESS;
 }

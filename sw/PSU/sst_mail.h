@@ -22,7 +22,10 @@
 #include "xil_cache.h"
 
 /************************** Constant Definitions *****************************/
-
+/**
+ * Para teste de interrupções
+ */
+//#define TESTAPP_GEN 1
 
 /**************************** Type Definitions *******************************/
 

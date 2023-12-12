@@ -75,9 +75,9 @@ char *SendMsg = data;
 char RecvMsg[MSGSIZ] __attribute__ ((aligned(4)));
 
 u32 temp1pad = 0;
-char *hello = "Hello! The Producer greets the Consumer...";
+char *hello = "ORAlo! BOAS roducer greets the Consumer...";
 u32 temp2pad = 0;
-char *rhello = "Hello! The Consumer greets the Producer...";
+char *rhello = "BOASo! ORA Consumer greets the Producer...";
 
 /************************** Function Prototypes ******************************/
 
