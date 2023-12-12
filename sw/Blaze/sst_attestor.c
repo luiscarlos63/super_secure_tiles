@@ -54,6 +54,7 @@
 #include "sleep.h"  // Include the sleep header
 
 #include "sst_io.h"
+#include "ssta_mail.h"
 
 /************************** Constant Definitions *****************************/
 
@@ -88,6 +89,9 @@ int main()
     	sst_ioPsGpioSetLED(SST_LED_1, 0);
     	usleep(300000);
     	sst_ioPsGpioSetLED(SST_LED_1, 1);
+
+    	my_ssta_mail_example();
+
     }
 
     cleanup_platform();

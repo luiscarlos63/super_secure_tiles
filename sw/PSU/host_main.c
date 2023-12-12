@@ -59,7 +59,7 @@
 #include "xintc.h"
 #include "xil_exception.h"
 #include "xgpiops.h"
-
+#include "sst_mail.h"
 
 // ----------------------------- File names ---------------------------------
 const char* ip_const33_rp_1 = "rp1_33.bin";
@@ -194,6 +194,28 @@ int main()
 				printf("\n\rLoad IP const_33 what tile:");
 				scanf("%d", &tile);
 				sst_load_ip(&sst, &ip_const33, tile);
+
+
+
+
+	/**
+	 * TODO: teste de MAILBOX
+	 */
+
+
+				myMailboxExample();
+
+
+
+
+
+
+
+
+
+
+
+
 				break;
 			case 5:
 				printf("\n\rLoad IP const_44 what tile:");
