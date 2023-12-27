@@ -88,8 +88,8 @@ int Timeout;
  * change all the needed parameters in one place.
  */
 #define MBOX_DEVICE_ID		XPAR_MBOX_0_DEVICE_ID
-#define INTC_DEVICE_ID		XPAR_INTC_0_DEVICE_ID
-#define MBOX_INTR_ID		XPAR_INTC_0_MBOX_0_VEC_ID
+#define GIC_DEVICE_ID		XPAR_SCUGIC_0_DEVICE_ID
+#define MBOX_INTR_ID		XPAR_FABRIC_MBOX_0_VEC_ID
 
 /**************************** Type Definitions *******************************/
 
@@ -105,9 +105,11 @@ char data[] __attribute__ ((aligned (4))) = {
 static XMbox Mbox;
 
 
-#ifndef TESTAPP_GEN
-static XIntc IntcInst;
-#endif
+//#ifndef TESTAPP_GEN
+//static XIntc IntcInst;
+//#endif
+
+XScuGic ScuGicInstance;
 
 static volatile int IntrCount = 0;
 static volatile int IntrSTACount = 0;
@@ -122,7 +124,7 @@ char *ProducerHello = "E Que! MEUS Putoscer HOSTAs the Consumer..";
 
 /************************** Function Prototypes ******************************/
 
-int MailboxExample(XIntc *IntcInstancePtr, u16 MboxDeviceId, u16 MboxIntrId);
+int MailboxExample(XScuGic *ScuGicInstancePtr, u16 MboxDeviceId, u16 MboxIntrId);
 
 int MailboxExample_Send(XMbox *MboxInstancePtr, int CPU_Id, int Blocking);
 int MailboxExample_Receive(XMbox *MboxInstancePtr, int CPU_Id, int Blocking);
@@ -130,9 +132,9 @@ int MailboxExample_Wait(volatile int *Count, char *Name, int Threshold);
 
 static void MailboxIntrHandler(void *CallbackRef);
 
-static int MailboxSetupIntrSystem(XIntc *IntcInstancePtr,
+static int MailboxSetupIntrSystem(XScuGic *ScuGicInstancePtr,
 				  XMbox *MboxInstPtr,
-				  u16 IntcDevId,
+				  u16 GicDevId,
 				  u16 MboxIntrId);
 
 /*****************************************************************************/
@@ -151,7 +153,7 @@ int myMailboxExample()
 {
 	printf ("MailboxExample :\tStarts for CPU %d.\r\n", MY_CPU_ID);
 
-	if (MailboxExample(&IntcInst, MBOX_DEVICE_ID, MBOX_INTR_ID)
+	if (MailboxExample(&ScuGicInstance, MBOX_DEVICE_ID, MBOX_INTR_ID)
 				!= XST_SUCCESS) {
 		printf("MailboxExample :\t mbox intr Example Failed.\r\n");
 		return XST_FAILURE;
@@ -171,7 +173,7 @@ int myMailboxExample()
 * processor. It also uses the interrupt to check whether the other processor
 * has started to send or receive.
 *
-* @param	IntcInstancePtr is the device instance of the interrupt
+* @param	ScuGicInstancePtr is the device instance of the interrupt
 *		controller that is being worked on.
 * @param	MboxDeviceId is the Mailbox device ID.
 * @param	MboxIntrId is the Mailbox interrupt ID.
@@ -183,7 +185,7 @@ int myMailboxExample()
 * @note		None
 *
 *****************************************************************************/
-int MailboxExample(XIntc *IntcInstancePtr, u16 MboxDeviceId, u16 MboxIntrId)
+int MailboxExample(XScuGic *ScuGicInstancePtr, u16 MboxDeviceId, u16 MboxIntrId)
 {
 	XMbox_Config *ConfigPtr;
 	int Status;
@@ -212,9 +214,9 @@ int MailboxExample(XIntc *IntcInstancePtr, u16 MboxDeviceId, u16 MboxIntrId)
 	/*
 	 * Setup the interrupt system.
 	 */
-	Status = MailboxSetupIntrSystem(IntcInstancePtr,
+	Status = MailboxSetupIntrSystem(ScuGicInstancePtr,
 					&Mbox,
-					INTC_DEVICE_ID,
+					GIC_DEVICE_ID,
 					MboxIntrId);
 
 	/* Send the hello */
@@ -394,7 +396,7 @@ int MailboxExample_Receive(XMbox *MboxInstancePtr, int CPU_Id, int Blocking)
 * device could be directly connected to a processor without an Interrupt
 * controller.  The  user should modify this function to fit the application.
 *
-* @param	IntcInstancePtr is a pointer to the instance of the INTC
+* @param	ScuGicInstancePtr is a pointer to the instance of the INTC
 *		component.
 * @param	MboxInstInstPtr is a pointer to the instance of the Mailbox.
 * @param	MboxIntrId is the interrupt Id and is typically
@@ -406,25 +408,50 @@ int MailboxExample_Receive(XMbox *MboxInstancePtr, int CPU_Id, int Blocking)
 * @note		None.
 *
 *****************************************************************************/
-static int MailboxSetupIntrSystem(XIntc *IntcInstancePtr,
+static int MailboxSetupIntrSystem(XScuGic *ScuGicInstancePtr,
 				  XMbox *MboxInstPtr,
-				  u16 IntcDevId,
+				  u16 GicDevId,
 				  u16 MboxIntrId)
 {
 	int Status;
+	int Result;
+	XScuGic_Config *ScuGicConfig;
 
-#ifndef TESTAPP_GEN
 	/*
 	 * Initialize the interrupt controller driver so that it is ready to
-	 * use
+	 * use.
 	 */
-	Status = XIntc_Initialize(IntcInstancePtr, IntcDevId);
-	if (Status != XST_SUCCESS) {
+	ScuGicConfig = XScuGic_LookupConfig(GIC_DEVICE_ID);
+	if (NULL == ScuGicConfig) {
 		return XST_FAILURE;
 	}
-#endif
+
+	Result = XScuGic_CfgInitialize(ScuGicInstancePtr, ScuGicConfig,
+			ScuGicConfig->CpuBaseAddress);
+	if (Result != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+	XScuGic_SetPriorityTriggerType(ScuGicInstancePtr, MboxIntrId,
+							0xA0, 0x3);
 
 	/*
+	 * Connect the interrupt handler that will be called when an
+	 * interrupt occurs for the device.
+	 */
+	Result = XScuGic_Connect(ScuGicInstancePtr, MboxIntrId,
+				 (Xil_ExceptionHandler)MailboxIntrHandler, MboxInstPtr);
+	if (Result != XST_SUCCESS) {
+		return Result;
+	}
+
+	/* Enable the interrupt for the GPIO device.*/
+	XScuGic_Enable(ScuGicInstancePtr, MboxIntrId);
+
+
+
+	/*------------------MAIL BOX INTR SETUP------------------------------------
 	 * Sets the Threshold
 	 */
 	if (MboxInstPtr->Config.UseFSL == 0) {
@@ -437,56 +464,22 @@ static int MailboxSetupIntrSystem(XIntc *IntcInstancePtr,
 	}
 
 	/*
-	 * Connect a device driver handler that will be called when an
-	 * interrupt for the device occurs, the device driver handler
-	 * performs the specific interrupt processing for the device
-	 */
-	Status = XIntc_Connect(IntcInstancePtr,
-				MboxIntrId,
-				(XInterruptHandler)MailboxIntrHandler,
-				(void *)MboxInstPtr);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	/*
 	 * The interrupt bits are not for FSL interface.
 	 */
 	if (MboxInstPtr->Config.UseFSL == 0)
 		XMbox_SetInterruptEnable(MboxInstPtr,
 					 XMB_IX_STA | XMB_IX_RTA | XMB_IX_ERR);
 
-
-#ifndef TESTAPP_GEN
-	/*
-	 * Start the interrupt controller such that interrupts are enabled for
-	 * all devices that cause interrupts. Specify real mode so that
-	 * the Mbox can generate interrupts through
-	 * the interrupt controller
-	 */
-	Status = XIntc_Start(IntcInstancePtr, XIN_REAL_MODE);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-#endif
-
-	/*
-	 * Enable the interrupt for the Mbox
-	 */
-	XIntc_Enable(IntcInstancePtr, MboxIntrId);
-
-#ifndef TESTAPP_GEN
 	Xil_ExceptionInit();
-
-	Xil_ExceptionEnable();
 
 	/*
 	 * Register the interrupt controller handler with the exception table.
 	 */
 	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
-				(Xil_ExceptionHandler)XIntc_InterruptHandler,
-				IntcInstancePtr);
-#endif /* TESTAPP_GEN */
+				(Xil_ExceptionHandler)XScuGic_InterruptHandler,
+				ScuGicInstancePtr);
+
+	Xil_ExceptionEnable();
 
 	return XST_SUCCESS;
 }

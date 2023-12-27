@@ -16,8 +16,7 @@
 #include "xmbox.h"
 #include "xstatus.h"
 #include "xparameters.h"
-#include "xintc.h"
-
+ #include "xscugic.h"
 #include "xil_exception.h"
 #include "xil_cache.h"
 

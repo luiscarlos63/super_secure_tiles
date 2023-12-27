@@ -46,6 +46,7 @@
  */
 
 
+
 #include <stdio.h>
 #include <stdint.h>
 #include "platform.h"
@@ -56,7 +57,6 @@
 #include <xil_types.h>
 
 #include "secure_tiles.h"
-#include "xintc.h"
 #include "xil_exception.h"
 #include "xgpiops.h"
 #include "sst_mail.h"
@@ -245,3 +245,5 @@ int main()
     cleanup_platform();
     return 0;
 }
+
+
