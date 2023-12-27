@@ -1,4 +1,4 @@
-/***************************************************************************
+/******************************************************************************
 *
 * Copyright (C) 2009 - 2014 Xilinx, Inc.  All rights reserved.
 *
@@ -45,6 +45,8 @@
  *   ps7_uart    115200 (configured by bootrom/bsp)
  */
 
+
+
 #include <stdio.h>
 #include <stdint.h>
 #include "platform.h"
@@ -54,8 +56,10 @@
 #include "xil_cache.h"
 #include <xil_types.h>
 
-//#include "dfx_controller.h"trhtrhtrjty
-
+#include "secure_tiles.h"
+#include "xil_exception.h"
+#include "xgpiops.h"
+#include "sst_mail.h"
 
 // ----------------------------- File names ---------------------------------
 const char* ip_const33_rp_1 = "rp1_33.bin";
@@ -74,28 +78,43 @@ int main()
 {
 
 	u32 	  * pcapCtrlPtr 	= (u32*)0x00FFCA3008;
-
 	int command = 0;
-	uint32_t tile;
-	uint8_t status;
-
-//	bitstream_t bit_ip_const33_rp_1;
-//	bitstream_t bit_ip_const44_rp_1;
-//	bitstream_t bit_ip_const55_rp_1;
-//	bitstream_t bit_ip_const33_rp_2;
-//	bitstream_t bit_ip_const44_rp_2;
-//	bitstream_t bit_ip_const55_rp_2;
-//	bitstream_t bit_ip_const33_rp_3;
-//	bitstream_t bit_ip_const44_rp_3;
-//	bitstream_t bit_ip_const55_rp_3;
-//
-//	ip_t ip_const33;
-//	ip_t ip_const44;
-//	ip_t ip_const55;
-//
-//	dfx_t dfx;
+		uint32_t tile;
+		int32_t status;
 
 
+	/*
+	 * TODO: TESTE
+	 * */
+	uint32_t outValue = 0;
+	uint32_t Output_Pin = 17;
+	XGpioPs Gpio;
+	XGpioPs_Config *ConfigPtr;
+
+	ConfigPtr = XGpioPs_LookupConfig(0);
+	status = XGpioPs_CfgInitialize(&Gpio, ConfigPtr,
+						ConfigPtr->BaseAddr);
+		if (status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+
+
+	bitstream_t bit_ip_const33_rp_1;
+	bitstream_t bit_ip_const44_rp_1;
+	bitstream_t bit_ip_const55_rp_1;
+	bitstream_t bit_ip_const33_rp_2;
+	bitstream_t bit_ip_const44_rp_2;
+	bitstream_t bit_ip_const55_rp_2;
+	bitstream_t bit_ip_const33_rp_3;
+	bitstream_t bit_ip_const44_rp_3;
+	bitstream_t bit_ip_const55_rp_3;
+
+	ip_t ip_const33;
+	ip_t ip_const44;
+	ip_t ip_const55;
+
+	sst_t sst;
 
     init_platform();
     disable_caches();
@@ -112,52 +131,39 @@ int main()
 
 
 	//------------------------- IPs init -------------------------------------------------
-//    ip_init_ip(&ip_const33, 1);
-//    ip_init_ip(&ip_const44, 2);
-//    ip_init_ip(&ip_const55, 3);
-//
-//    //-------------------------loading Bitstreams  to memory and associate to the IP -----
-//    bitstream_init(&bit_ip_const33_rp_1, ip_const33_rp_1);
-//    bitstream_init(&bit_ip_const33_rp_2, ip_const33_rp_2);
-//    bitstream_init(&bit_ip_const33_rp_3, ip_const33_rp_3);
-//    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_1, TILE_1_ID);
-//    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_2, TILE_2_ID);
-//    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_3, TILE_3_ID);
-//
-//    bitstream_init(&bit_ip_const44_rp_1, ip_const44_rp_1);
-//    bitstream_init(&bit_ip_const44_rp_2, ip_const44_rp_2);
-//    bitstream_init(&bit_ip_const44_rp_3, ip_const44_rp_3);
-//    ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_1, TILE_1_ID);
-//	ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_2, TILE_2_ID);
-//	ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_3, TILE_3_ID);
-//
-//    bitstream_init(&bit_ip_const55_rp_1, ip_const55_rp_1);
-//    bitstream_init(&bit_ip_const55_rp_2, ip_const55_rp_2);
-//    bitstream_init(&bit_ip_const55_rp_3, ip_const55_rp_3);
-//	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_1, TILE_1_ID);
-//	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_2, TILE_2_ID);
-//	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_3, TILE_3_ID);
+    ip_init_ip(&ip_const33, 1);
+    ip_init_ip(&ip_const44, 2);
+    ip_init_ip(&ip_const55, 3);
+
+    //-------------------------loading Bitstreams  to memory and associate to the IP -----
+    bitstream_init(&bit_ip_const33_rp_1, ip_const33_rp_1);
+    bitstream_init(&bit_ip_const33_rp_2, ip_const33_rp_2);
+    bitstream_init(&bit_ip_const33_rp_3, ip_const33_rp_3);
+    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_1, TILE_1_ID);
+    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_2, TILE_2_ID);
+    ip_add_bitstream(&ip_const33, &bit_ip_const33_rp_3, TILE_3_ID);
+
+    bitstream_init(&bit_ip_const44_rp_1, ip_const44_rp_1);
+    bitstream_init(&bit_ip_const44_rp_2, ip_const44_rp_2);
+    bitstream_init(&bit_ip_const44_rp_3, ip_const44_rp_3);
+    ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_1, TILE_1_ID);
+	ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_2, TILE_2_ID);
+	ip_add_bitstream(&ip_const44, &bit_ip_const44_rp_3, TILE_3_ID);
+
+    bitstream_init(&bit_ip_const55_rp_1, ip_const55_rp_1);
+    bitstream_init(&bit_ip_const55_rp_2, ip_const55_rp_2);
+    bitstream_init(&bit_ip_const55_rp_3, ip_const55_rp_3);
+	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_1, TILE_1_ID);
+	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_2, TILE_2_ID);
+	ip_add_bitstream(&ip_const55, &bit_ip_const55_rp_3, TILE_3_ID);
     printf("\nBitstreams loaded into memory ");
-
-//    printf("bit_ip_const44_rp_2 - %X  - %X", bit_ip_const44_rp_2.data, bit_ip_const44_rp_2.size);
-//    printf("bit_ip_const55_rp_2 - %X  - %X", bit_ip_const55_rp_2.data, bit_ip_const55_rp_2.size);
-
-    //-------------------------- Set IPs --------------------------------------------------
-
-
     printf("\nIPs created");
 
-    //-------------------------- DFX init -------------------------------------------------
-//	if(dfx_init(&dfx)){
-//		printf("Error initializaing DFX Controller");
-//		return -1;
-//	}
-
-    print("\n\r\n\r*** Dynamic Function eXchange SW Trigger ***\n\r");
+    sst_init(&sst);
 
     while(1)
 	{
-		printf("\n\n\n\r1 - read from RP_1");
+		printf("\n\n\r1 - read from RP_1");
 		printf("\n2 - read from RP_2");
 		printf("\n3 - read from RP_3");
 		printf("\n4 - Load IP const_33");
@@ -170,15 +176,15 @@ int main()
 		switch(command)
 		{
 			case 1:
-//				status = Xil_In32(TILE_1_ADDR);
+				status = Xil_In32(TILE_1_ADDR);
 				printf("\nRP_1 value = %X", status);
 				break;
 			case 2:
-//				status = Xil_In32(TILE_2_ADDR);
+				status = Xil_In32(TILE_2_ADDR);
 				printf("\nRP_2 value = %X", status);
 				break;
 			case 3:
-//				status = Xil_In32(TILE_3_ADDR);
+				status = Xil_In32(TILE_3_ADDR);
 				printf("\nRP_3 value = %X", status);
 				break;
 				/*
@@ -187,17 +193,50 @@ int main()
 			case 4:
 				printf("\n\rLoad IP const_33 what tile:");
 				scanf("%d", &tile);
-//				dfx_load_ip(&dfx, &ip_const33, tile);
+				sst_load_ip(&sst, &ip_const33, tile);
+
+
+
+
+	/**
+	 * TODO: teste de MAILBOX
+	 */
+
+
+				myMailboxExample();
+
+
+
+
+
+
+
+
+
+
+
+
 				break;
 			case 5:
 				printf("\n\rLoad IP const_44 what tile:");
 				scanf("%d", &tile);
-//				dfx_load_ip(&dfx, &ip_const44, tile);
+				sst_load_ip(&sst, &ip_const44, tile);
 				break;
 			case 6:
 				printf("\n\rLoad IP const_55 what tile:");
 				scanf("%d", &tile);
-//				dfx_load_ip(&dfx, &ip_const55, tile);
+				sst_load_ip(&sst, &ip_const55, tile);
+				break;
+
+			/*
+			 * write in Debug
+			 */
+			case 7:
+				XGpioPs_SetDirectionPin(&Gpio, Output_Pin, 1);
+				XGpioPs_SetOutputEnablePin(&Gpio, Output_Pin, 1);
+
+				/* Set the GPIO output to be low. */
+				XGpioPs_WritePin(&Gpio, Output_Pin, outValue);
 				break;
 		default: break;
 		}	// end of "switch(command)"
@@ -206,3 +245,5 @@ int main()
     cleanup_platform();
     return 0;
 }
+
+

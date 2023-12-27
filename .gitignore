@@ -10,3 +10,4 @@ vivado.log
 hs_err*
 vitis_project/*
 vitis_/*
+hd_visual/* 
